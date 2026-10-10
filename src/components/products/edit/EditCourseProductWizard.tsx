@@ -49,6 +49,8 @@ import {
   validateCourseWizardStep,
 } from '@/lib/course-wizard-step-validation';
 import { updateFullCourseTx } from '@/lib/products/product-update-rpc';
+import { assertUserCanManageProduct } from '@/lib/products/can-manage-product';
+import { triggerProductUpdatedWebhook } from '@/lib/products/trigger-product-updated-webhook';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { logger } from '@/lib/logger';
 import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
@@ -144,23 +146,8 @@ const convertToFormData = async (
   affiliateData: CourseAffiliateData;
   pixelsData: CoursePixelsData;
 }> => {
-  // ✅ SÉCURITÉ: Vérifier propriété du produit avant chargement
   if (userId) {
-    const { data: ownershipCheck, error: ownershipError } = await supabase
-      .from('products')
-      .select(
-        `
-        id,
-        stores!inner(user_id)
-      `
-      )
-      .eq('id', productId)
-      .eq('stores.user_id', userId)
-      .single();
-
-    if (ownershipError || !ownershipCheck) {
-      throw new Error('Accès non autorisé à ce produit');
-    }
+    await assertUserCanManageProduct(productId, userId);
   }
 
   // Produit principal
@@ -462,23 +449,8 @@ export const EditCourseProductWizard = ({
 
     setIsSaving(true);
     try {
-      // ✅ SÉCURITÉ: Vérifier propriété du produit avant modification
       if (user) {
-        const { data: ownershipCheck, error: ownershipError } = await supabase
-          .from('products')
-          .select(
-            `
-            id,
-            stores!inner(user_id)
-          `
-          )
-          .eq('id', productId)
-          .eq('stores.user_id', user.id)
-          .single();
-
-        if (ownershipError || !ownershipCheck) {
-          throw new Error("Vous n'avez pas les permissions pour modifier ce produit");
-        }
+        await assertUserCanManageProduct(productId, user.id);
       }
       // Generate slug if not provided
       let slug =
@@ -596,6 +568,14 @@ export const EditCourseProductWizard = ({
       });
 
       await persistProductWhatsApp(productId, formData.whatsapp_number, formData.whatsapp_enabled);
+
+      triggerProductUpdatedWebhook(store.id, {
+        product_id: productId,
+        name: formData.title,
+        product_type: 'course',
+        price: formData.price,
+        currency: formData.currency,
+      });
 
       toast({
         title: '✅ Cours mis à jour',

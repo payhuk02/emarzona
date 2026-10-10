@@ -52,13 +52,17 @@ export async function updateDigitalProductTx(
   storeId: string,
   productId: string,
   product: Record<string, unknown>,
-  digital: Record<string, unknown>
+  digital: Record<string, unknown>,
+  files: Record<string, unknown>[] | null = null,
+  affiliate: Record<string, unknown> | null = null
 ): Promise<ProductCreateRpcResult> {
   const { data, error } = await rpc('update_digital_product_tx', {
     p_store_id: storeId,
     p_product_id: productId,
     p_product: product,
     p_digital: digital,
+    p_files: files,
+    p_affiliate: affiliate,
   });
   return parseRpcResult(data, error);
 }

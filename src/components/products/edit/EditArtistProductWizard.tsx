@@ -48,6 +48,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { updateArtistProductTx } from '@/lib/products/product-update-rpc';
+import { assertUserCanManageProduct } from '@/lib/products/can-manage-product';
+import { triggerProductUpdatedWebhook } from '@/lib/products/trigger-product-updated-webhook';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { ProductWhatsAppContactConfig } from '@/components/products/shared/ProductWhatsAppContactConfig';
 import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
@@ -442,23 +444,8 @@ export const EditArtistProductWizard = ({
     try {
       const sanitizedData = validateAndSanitizeArtistProduct(formData);
 
-      // ✅ SÉCURITÉ: Vérifier propriété du produit avant modification
       if (user) {
-        const { data: ownershipCheck, error: ownershipError } = await supabase
-          .from('products')
-          .select(
-            `
-            id,
-            stores!inner(user_id)
-          `
-          )
-          .eq('id', artistProductData.product_id)
-          .eq('stores.user_id', user.id)
-          .single();
-
-        if (ownershipError || !ownershipCheck) {
-          throw new Error("Vous n'avez pas les permissions pour modifier ce produit artiste");
-        }
+        await assertUserCanManageProduct(artistProductData.product_id, user.id);
       }
 
       const productSlug =
@@ -594,6 +581,16 @@ export const EditArtistProductWizard = ({
       }
 
       localStorage.removeItem('artist-product-draft');
+
+      if (!isDraft && store?.id) {
+        triggerProductUpdatedWebhook(store.id, {
+          product_id: artistProductData.product_id,
+          name: formData.artwork_title || formData.name,
+          product_type: 'artist',
+          price: formData.price,
+          currency: 'XOF',
+        });
+      }
 
       toast({
         title: '✅ Succès',

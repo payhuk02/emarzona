@@ -66,6 +66,8 @@ import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { updatePhysicalProductTx } from '@/lib/products/product-update-rpc';
+import { assertUserCanManageProduct } from '@/lib/products/can-manage-product';
+import { triggerProductUpdatedWebhook } from '@/lib/products/trigger-product-updated-webhook';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { persistProductCountryOfOrigin } from '@/lib/products/persist-product-country';
 import { supabase } from '@/integrations/supabase/client';
@@ -203,23 +205,8 @@ const convertToFormData = async (
   productId: string,
   userId?: string
 ): Promise<Partial<PhysicalProductFormData>> => {
-  // ✅ SÉCURITÉ: Vérifier propriété du produit avant chargement
   if (userId) {
-    const { data: ownershipCheck, error: ownershipError } = await supabase
-      .from('products')
-      .select(
-        `
-        id,
-        stores!inner(user_id)
-      `
-      )
-      .eq('id', productId)
-      .eq('stores.user_id', userId)
-      .single();
-
-    if (ownershipError || !ownershipCheck) {
-      throw new Error('Accès non autorisé à ce produit');
-    }
+    await assertUserCanManageProduct(productId, userId);
   }
 
   // Produit principal
@@ -612,23 +599,8 @@ export const EditPhysicalProductWizard = ({
 
     setIsSaving(true);
     try {
-      // ✅ SÉCURITÉ: Vérifier propriété du produit avant modification
       if (user) {
-        const { data: ownershipCheck, error: ownershipError } = await supabase
-          .from('products')
-          .select(
-            `
-            id,
-            stores!inner(user_id)
-          `
-          )
-          .eq('id', productId)
-          .eq('stores.user_id', user.id)
-          .single();
-
-        if (ownershipError || !ownershipCheck) {
-          throw new Error("Vous n'avez pas les permissions pour modifier ce produit");
-        }
+        await assertUserCanManageProduct(productId, user.id);
       }
       if (
         formData.is_active &&
@@ -754,6 +726,7 @@ export const EditPhysicalProductWizard = ({
 
       if (hasVariants && formData.variants) {
         variantsData = formData.variants.map((variant: PhysicalProductVariant) => ({
+          id: variant.id || null,
           option1_value: variant.option1_value,
           option2_value: variant.option2_value ?? null,
           option3_value: variant.option3_value ?? null,
@@ -821,6 +794,14 @@ export const EditPhysicalProductWizard = ({
       }
 
       await syncProductReturnPolicy(store.id, productId, formData.return_policy_id ?? null);
+
+      triggerProductUpdatedWebhook(store.id, {
+        product_id: productId,
+        name: formData.name,
+        product_type: 'physical',
+        price: formData.price,
+        currency: 'XOF',
+      });
 
       toast({
         title: '✅ Produit mis à jour',

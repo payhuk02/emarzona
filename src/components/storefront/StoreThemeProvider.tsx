@@ -271,20 +271,34 @@ const generateThemeCSS = (theme: StoreTheme): string => {
       padding: 4rem 0;
     }
 
-    /* Navigation personnalisée */
+    /* Navigation — classes appliquées sur TabsList (StoreTabs) */
     .store-theme-active .store-navigation-horizontal {
-      display: flex;
+      display: inline-flex;
       flex-direction: row;
     }
 
     .store-theme-active .store-navigation-vertical {
       display: flex;
       flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    .store-theme-active .store-navigation-vertical .store-tab-trigger {
+      width: 100%;
+      border-bottom-width: 0;
+      border-left: 2px solid transparent;
+    }
+
+    .store-theme-active .store-navigation-vertical .store-tab-trigger[data-state="active"] {
+      border-left-color: var(--store-primary) !important;
+      border-bottom-color: transparent !important;
     }
 
     .store-theme-active .store-navigation-mega {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      width: 100%;
     }
 
     /* Tabs personnalisés */

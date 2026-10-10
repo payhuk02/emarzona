@@ -95,13 +95,9 @@ describe('StoreCustomizationWizard', () => {
   });
 
   it('should render all customization steps for physical commerce type', () => {
-    render(
-      <StoreCustomizationWizard
-        store={mockStore}
-        onSave={vi.fn()}
-      />,
-      { wrapper: createWrapper() }
-    );
+    render(<StoreCustomizationWizard store={mockStore} onSave={vi.fn()} />, {
+      wrapper: createWrapper(),
+    });
 
     // Vérifier que les étapes principales sont affichées
     expect(screen.getByText(/Informations/i)).toBeInTheDocument();
@@ -119,13 +115,9 @@ describe('StoreCustomizationWizard', () => {
   it('should hide commerce tab for non-physical commerce types', () => {
     const digitalStore = { ...mockStore, commerce_type: 'digital' };
 
-    render(
-      <StoreCustomizationWizard
-        store={digitalStore}
-        onSave={vi.fn()}
-      />,
-      { wrapper: createWrapper() }
-    );
+    render(<StoreCustomizationWizard store={digitalStore} onSave={vi.fn()} />, {
+      wrapper: createWrapper(),
+    });
 
     // L'onglet Commerce ne devrait pas être visible
     expect(screen.queryByText(/Commerce/i)).not.toBeInTheDocument();
@@ -135,13 +127,9 @@ describe('StoreCustomizationWizard', () => {
     const user = userEvent.setup();
     const onSave = vi.fn();
 
-    render(
-      <StoreCustomizationWizard
-        store={mockStore}
-        onSave={onSave}
-      />,
-      { wrapper: createWrapper() }
-    );
+    render(<StoreCustomizationWizard store={mockStore} onSave={onSave} />, {
+      wrapper: createWrapper(),
+    });
 
     // Cliquer sur l'étape Apparence
     const appearanceStep = screen.getByText(/Apparence/i);
@@ -183,15 +171,11 @@ describe('StoreCustomizationWizard', () => {
       validateField: vi.fn(() => 'Ce champ est requis' as string | null),
       handleSubmit: vi.fn(),
       applyConfig: vi.fn(),
-    }));
+    });
 
-    render(
-      <StoreCustomizationWizard
-        store={mockStore}
-        onSave={onSave}
-      />,
-      { wrapper: createWrapper() }
-    );
+    render(<StoreCustomizationWizard store={mockStore} onSave={onSave} />, {
+      wrapper: createWrapper(),
+    });
 
     // Tenter de sauvegarder
     const saveButton = screen.getByRole('button', { name: /Enregistrer/i });
@@ -207,13 +191,9 @@ describe('StoreCustomizationWizard', () => {
     const user = userEvent.setup();
     const onSave = vi.fn();
 
-    render(
-      <StoreCustomizationWizard
-        store={mockStore}
-        onSave={onSave}
-      />,
-      { wrapper: createWrapper() }
-    );
+    render(<StoreCustomizationWizard store={mockStore} onSave={onSave} />, {
+      wrapper: createWrapper(),
+    });
 
     // Cliquer sur le bouton de sauvegarde
     const saveButton = screen.getByRole('button', { name: /Enregistrer/i });
@@ -254,15 +234,11 @@ describe('StoreCustomizationWizard', () => {
       validateField: vi.fn(() => null as string | null),
       handleSubmit: vi.fn(),
       applyConfig: vi.fn(),
-    } as any);
+    });
 
-    render(
-      <StoreCustomizationWizard
-        store={mockStore}
-        onSave={onSave}
-      />,
-      { wrapper: createWrapper() }
-    );
+    render(<StoreCustomizationWizard store={mockStore} onSave={onSave} />, {
+      wrapper: createWrapper(),
+    });
 
     // Vérifier que le timestamp de sauvegarde est affiché
     await waitFor(() => {
@@ -299,15 +275,11 @@ describe('StoreCustomizationWizard', () => {
       validateField: vi.fn(() => null as string | null),
       handleSubmit: vi.fn(),
       applyConfig: vi.fn(),
-    } as any);
+    });
 
-    render(
-      <StoreCustomizationWizard
-        store={mockStore}
-        onSave={onSave}
-      />,
-      { wrapper: createWrapper() }
-    );
+    render(<StoreCustomizationWizard store={mockStore} onSave={onSave} />, {
+      wrapper: createWrapper(),
+    });
 
     const saveButton = screen.getByRole('button', { name: /Enregistrement/i });
     expect(saveButton).toBeDisabled();
@@ -322,13 +294,9 @@ describe('StoreCustomizationWizard', () => {
       contact_email: 'contact@example.com',
     };
 
-    render(
-      <StoreCustomizationWizard
-        store={completedStore}
-        onSave={vi.fn()}
-      />,
-      { wrapper: createWrapper() }
-    );
+    render(<StoreCustomizationWizard store={completedStore} onSave={vi.fn()} />, {
+      wrapper: createWrapper(),
+    });
 
     // Vérifier que les étapes complétées affichent un indicateur
     const completedIndicator = screen.getAllByRole('status');
@@ -339,7 +307,7 @@ describe('StoreCustomizationWizard', () => {
     const user = userEvent.setup();
     const applyConfig = vi.fn();
 
-    vi.mocked(require('@/hooks/useStoreFormState').useStoreFormState).mockReturnValue({
+    mockUseStoreFormState.mockReturnValue({
       formState: {
         name: 'Test Store',
         slug: 'test-store',
@@ -354,13 +322,9 @@ describe('StoreCustomizationWizard', () => {
       applyConfig,
     });
 
-    render(
-      <StoreCustomizationWizard
-        store={mockStore}
-        onSave={vi.fn()}
-      />,
-      { wrapper: createWrapper() }
-    );
+    render(<StoreCustomizationWizard store={mockStore} onSave={vi.fn()} />, {
+      wrapper: createWrapper(),
+    });
 
     // Naviguer vers l'onglet Apparence
     await user.click(screen.getByText(/Apparence/i));
@@ -374,13 +338,9 @@ describe('StoreCustomizationWizard', () => {
   it('should show location tab only for physical commerce type', () => {
     const physicalStore = { ...mockStore, commerce_type: 'physical' };
 
-    render(
-      <StoreCustomizationWizard
-        store={physicalStore}
-        onSave={vi.fn()}
-      />,
-      { wrapper: createWrapper() }
-    );
+    render(<StoreCustomizationWizard store={physicalStore} onSave={vi.fn()} />, {
+      wrapper: createWrapper(),
+    });
 
     expect(screen.getByText(/Localisation/i)).toBeInTheDocument();
   });
@@ -388,13 +348,9 @@ describe('StoreCustomizationWizard', () => {
   it('should hide location tab for digital commerce type', () => {
     const digitalStore = { ...mockStore, commerce_type: 'digital' };
 
-    render(
-      <StoreCustomizationWizard
-        store={digitalStore}
-        onSave={vi.fn()}
-      />,
-      { wrapper: createWrapper() }
-    );
+    render(<StoreCustomizationWizard store={digitalStore} onSave={vi.fn()} />, {
+      wrapper: createWrapper(),
+    });
 
     expect(screen.queryByText(/Localisation/i)).not.toBeInTheDocument();
   });

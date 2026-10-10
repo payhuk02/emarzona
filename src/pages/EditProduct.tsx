@@ -9,8 +9,8 @@ import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Product } from '@/types/marketplace';
-import { logger } from '@/lib/logger';
 import { FormErrorBoundary } from '@/components/errors/FormErrorBoundary';
+import { userCanManageProduct } from '@/lib/products/can-manage-product';
 
 // Lazy load all edit wizards
 const EditPhysicalProductWizard = lazy(() =>
@@ -61,43 +61,15 @@ const EditProduct = () => {
   const [loading, setLoading] = useState(true);
   const [loadingPhase, setLoadingPhase] = useState<'auth' | 'security' | 'data' | 'ready'>('auth');
 
-  // ✅ SÉCURITÉ: Fonction de validation de propriété du produit
-  const validateProductOwnership = async (productId: string, userId: string): Promise<boolean> => {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select(
-          `
-          id,
-          store_id,
-          stores!inner(user_id)
-        `
-        )
-        .eq('id', productId)
-        .eq('stores.user_id', userId)
-        .single();
-
-      if (error) {
-        logger.error('❌ [EditProduct] Erreur validation propriété:', error);
-        return false;
-      }
-
-      return !!data;
-    } catch (error) {
-      logger.error('❌ [EditProduct] Erreur validation propriété:', error);
-      return false;
-    }
-  };
-
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id || !user) return;
 
       try {
         setLoadingPhase('security');
-        // ✅ SÉCURITÉ: Vérifier que l'utilisateur possède ce produit
-        const hasOwnership = await validateProductOwnership(id, user.id);
-        if (!hasOwnership) {
+        // Owner ou membre équipe avec products.manage
+        const hasAccess = await userCanManageProduct(id, user.id);
+        if (!hasAccess) {
           toast({
             title: 'Accès refusé',
             description: "Vous n'avez pas les permissions pour modifier ce produit.",

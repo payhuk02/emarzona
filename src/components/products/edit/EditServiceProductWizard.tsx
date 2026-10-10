@@ -42,6 +42,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { updateServiceProductTx } from '@/lib/products/product-update-rpc';
+import { assertUserCanManageProduct } from '@/lib/products/can-manage-product';
+import { triggerProductUpdatedWebhook } from '@/lib/products/trigger-product-updated-webhook';
 import { toServiceAffiliateRpcPayload } from '@/lib/products/service-affiliate-payload';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { persistServiceCategoryAttributes } from '@/lib/service/persist-service-category-attributes';
@@ -316,23 +318,8 @@ export const EditServiceProductWizard = ({
 
     setIsSaving(true);
     try {
-      // ✅ SÉCURITÉ: Vérifier propriété du produit avant modification
       if (user) {
-        const { data: ownershipCheck, error: ownershipError } = await supabase
-          .from('products')
-          .select(
-            `
-            id,
-            stores!inner(user_id)
-          `
-          )
-          .eq('id', productId)
-          .eq('stores.user_id', user.id)
-          .single();
-
-        if (ownershipError || !ownershipCheck) {
-          throw new Error("Vous n'avez pas les permissions pour modifier ce produit");
-        }
+        await assertUserCanManageProduct(productId, user.id);
       }
       // Generate slug if not provided
       let slug =
@@ -523,6 +510,14 @@ export const EditServiceProductWizard = ({
             Offres projet
           </ToastAction>
         ) : undefined,
+      });
+
+      triggerProductUpdatedWebhook(store.id, {
+        product_id: productId,
+        name: formData.name,
+        product_type: 'service',
+        price: formData.price,
+        currency: formData.currency,
       });
 
       invalidateCatalog();

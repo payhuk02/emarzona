@@ -16,6 +16,8 @@ describe('css-sanitize', () => {
 
   it('whitelists fonts', () => {
     expect(sanitizeStoreFont('Roboto', 'Inter')).toBe('Roboto');
+    expect(sanitizeStoreFont('Ubuntu', 'Inter')).toBe('Ubuntu');
+    expect(sanitizeStoreFont('Nunito', 'Inter')).toBe('Nunito');
     expect(sanitizeStoreFont("Evil');@import url(x)", 'Inter')).toBe('Inter');
   });
 

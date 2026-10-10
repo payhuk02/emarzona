@@ -48,6 +48,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { updateDigitalProductTx } from '@/lib/products/product-update-rpc';
+import { assertUserCanManageProduct } from '@/lib/products/can-manage-product';
+import { triggerProductUpdatedWebhook } from '@/lib/products/trigger-product-updated-webhook';
+import { toServiceAffiliateRpcPayload } from '@/lib/products/service-affiliate-payload';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { buildDigitalProductFilesPayload } from '@/lib/digital/build-digital-product-files-payload';
 import { resolvePrimaryDigitalFile } from '@/lib/digital/resolve-primary-digital-file';
@@ -130,23 +133,8 @@ const convertToFormData = async (
   productId: string,
   userId?: string
 ): Promise<Partial<DigitalProductFormData>> => {
-  // ✅ SÉCURITÉ: Vérifier propriété du produit avant chargement
   if (userId) {
-    const { data: ownershipCheck, error: ownershipError } = await supabase
-      .from('products')
-      .select(
-        `
-        id,
-        stores!inner(user_id)
-      `
-      )
-      .eq('id', productId)
-      .eq('stores.user_id', userId)
-      .single();
-
-    if (ownershipError || !ownershipCheck) {
-      throw new Error('Accès non autorisé à ce produit');
-    }
+    await assertUserCanManageProduct(productId, userId);
   }
 
   // Produit principal
@@ -559,23 +547,8 @@ export const EditDigitalProductWizard = ({
 
     setIsSaving(true);
     try {
-      // ✅ SÉCURITÉ: Vérifier propriété du produit avant modification
       if (user) {
-        const { data: ownershipCheck, error: ownershipError } = await supabase
-          .from('products')
-          .select(
-            `
-            id,
-            stores!inner(user_id)
-          `
-          )
-          .eq('id', productId)
-          .eq('stores.user_id', user.id)
-          .single();
-
-        if (ownershipError || !ownershipCheck) {
-          throw new Error("Vous n'avez pas les permissions pour modifier ce produit");
-        }
+        await assertUserCanManageProduct(productId, user.id);
       }
       // Generate slug if not provided
       let slug =
@@ -672,21 +645,6 @@ export const EditDigitalProductWizard = ({
         version: formData.version || '1.0',
       };
 
-      const rpcResult = await updateDigitalProductTx(
-        store.id,
-        productId,
-        productPayload,
-        digitalPayload
-      );
-
-      await persistProductWhatsApp(productId, formData.whatsapp_number, formData.whatsapp_enabled);
-
-      const digitalProductId = rpcResult.digital_product_id;
-      if (!digitalProductId) {
-        throw new Error('Enregistrement produit digital introuvable');
-      }
-
-      // Sync digital_product_files (main-only uploads included)
       const filesPayload = buildDigitalProductFilesPayload({
         main_file_url: formData.main_file_url || mainFile?.url || '',
         main_file_version: formData.main_file_version,
@@ -696,66 +654,33 @@ export const EditDigitalProductWizard = ({
           : null,
       });
 
-      if (filesPayload.length > 0) {
-        await supabase
-          .from('digital_product_files')
-          .delete()
-          .eq('digital_product_id', digitalProductId);
+      const affiliatePayload = toServiceAffiliateRpcPayload(formData.affiliate, {
+        includeWhenDisabled: true,
+      });
 
-        const filesData = filesPayload.map(row => ({
-          digital_product_id: digitalProductId,
-          name: row.name,
-          file_url: row.file_url,
-          file_type: row.file_type,
-          file_size_mb: row.file_size_mb,
-          order_index: row.order_index,
-          is_main: row.is_main,
-          is_preview: row.is_preview,
-          requires_purchase: row.requires_purchase,
-          version: row.version,
-        }));
+      const rpcResult = await updateDigitalProductTx(
+        store.id,
+        productId,
+        productPayload,
+        digitalPayload,
+        filesPayload,
+        affiliatePayload
+      );
 
-        const { error: filesError } = await supabase
-          .from('digital_product_files')
-          .insert(filesData);
+      await persistProductWhatsApp(productId, formData.whatsapp_number, formData.whatsapp_enabled);
 
-        if (filesError) throw filesError;
+      const digitalProductId = rpcResult.digital_product_id;
+      if (!digitalProductId) {
+        throw new Error('Enregistrement produit digital introuvable');
       }
 
-      // Sync affiliate settings (enable or disable)
-      const { data: existingAffiliate } = await supabase
-        .from('product_affiliate_settings')
-        .select('id')
-        .eq('product_id', productId)
-        .limit(1)
-        .maybeSingle();
-
-      const affiliateData = {
+      triggerProductUpdatedWebhook(store.id, {
         product_id: productId,
-        store_id: store.id,
-        affiliate_enabled: formData.affiliate?.enabled ?? false,
-        commission_rate: formData.affiliate?.commission_rate ?? 20,
-        commission_type: formData.affiliate?.commission_type ?? 'percentage',
-        fixed_commission_amount: formData.affiliate?.fixed_commission_amount ?? 0,
-        cookie_duration_days: formData.affiliate?.cookie_duration_days ?? 30,
-        min_order_amount: formData.affiliate?.min_order_amount ?? 0,
-        allow_self_referral: formData.affiliate?.allow_self_referral ?? false,
-        require_approval: formData.affiliate?.require_approval ?? false,
-        terms_and_conditions: formData.affiliate?.terms_and_conditions ?? '',
-      };
-
-      if (existingAffiliate) {
-        const { error: affiliateError } = await supabase
-          .from('product_affiliate_settings')
-          .update(affiliateData)
-          .eq('id', existingAffiliate.id);
-        if (affiliateError) throw affiliateError;
-      } else if (formData.affiliate?.enabled) {
-        const { error: affiliateError } = await supabase
-          .from('product_affiliate_settings')
-          .insert(affiliateData);
-        if (affiliateError) throw affiliateError;
-      }
+        name: formData.name,
+        product_type: 'digital',
+        price: formData.price,
+        currency: formData.currency,
+      });
 
       toast({
         title: '✅ Produit mis à jour',

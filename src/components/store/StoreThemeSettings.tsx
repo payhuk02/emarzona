@@ -95,8 +95,7 @@ export const StoreThemeSettings: React.FC<StoreThemeSettingsProps> = ({
   letterSpacing,
   headerStyle,
   footerStyle,
-  sidebarEnabled,
-  sidebarPosition,
+  // sidebarEnabled / sidebarPosition: acceptés pour compat API, pas encore rendus storefront
   productGridColumns,
   productCardStyle,
   navigationStyle,

@@ -20,6 +20,9 @@ interface StoreTabsProps {
   previewMode?: boolean;
 }
 
+const tabTriggerClass =
+  'rounded-none border-b-2 border-transparent px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap transition-colors store-tab-trigger justify-start';
+
 const StoreTabs = ({
   productsContent,
   aboutContent,
@@ -36,72 +39,90 @@ const StoreTabs = ({
     return resolveStoreHeaderTabs(commerceType, store ?? null);
   }, [store]);
 
-  const navigationStyleClass = `store-navigation-${theme.navigationStyle}`;
+  const navStyle = theme.navigationStyle;
+  const isVertical = navStyle === 'vertical';
+  const isMega = navStyle === 'mega';
+  const navigationStyleClass = `store-navigation-${navStyle}`;
+
+  const tabsList = (
+    <TabsList
+      className={cn(
+        'w-full justify-start rounded-none h-auto p-0 bg-transparent',
+        navigationStyleClass,
+        isVertical && 'flex flex-col items-stretch min-w-0',
+        isMega && 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-0 min-w-0',
+        !isVertical && !isMega && 'inline-flex min-w-full flex-row'
+      )}
+    >
+      <TabsTrigger
+        value="products"
+        className={tabTriggerClass}
+        style={{
+          color: theme.textColor,
+          borderBottomColor: 'transparent',
+        }}
+      >
+        {t(tabConfig.productsLabelKey)}
+      </TabsTrigger>
+      {tabConfig.showAbout && (
+        <TabsTrigger
+          value="about"
+          className={tabTriggerClass}
+          style={{
+            color: theme.textColor,
+            borderBottomColor: 'transparent',
+          }}
+        >
+          {t('storefront.tabs.about')}
+        </TabsTrigger>
+      )}
+      {tabConfig.showReviews && (
+        <TabsTrigger
+          value="reviews"
+          className={tabTriggerClass}
+          style={{
+            color: theme.textColor,
+            borderBottomColor: 'transparent',
+          }}
+        >
+          {t('storefront.tabs.reviews')}
+        </TabsTrigger>
+      )}
+      {tabConfig.showContact && (
+        <TabsTrigger
+          value="contact"
+          className={tabTriggerClass}
+          style={{
+            color: theme.textColor,
+            borderBottomColor: 'transparent',
+          }}
+        >
+          {t('storefront.tabs.contact')}
+        </TabsTrigger>
+      )}
+    </TabsList>
+  );
 
   return (
     <Tabs defaultValue="products" className="w-full">
       <div
         className={cn(
           'sticky z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b',
-          previewMode ? 'top-9' : 'top-0',
-          navigationStyleClass
+          previewMode ? 'top-9' : 'top-0'
         )}
         style={{
           backgroundColor: theme.backgroundColor + 'F5',
           borderColor: theme.textSecondaryColor + '40',
         }}
       >
-        <ScrollArea className="w-full">
-          <TabsList className="w-full justify-start rounded-none h-auto p-0 bg-transparent inline-flex min-w-full">
-            <TabsTrigger
-              value="products"
-              className="rounded-none border-b-2 border-transparent px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap transition-colors store-tab-trigger"
-              style={{
-                color: theme.textColor,
-                borderBottomColor: 'transparent',
-              }}
-            >
-              {t(tabConfig.productsLabelKey)}
-            </TabsTrigger>
-            {tabConfig.showAbout && (
-              <TabsTrigger
-                value="about"
-                className="rounded-none border-b-2 border-transparent px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap transition-colors store-tab-trigger"
-                style={{
-                  color: theme.textColor,
-                  borderBottomColor: 'transparent',
-                }}
-              >
-                {t('storefront.tabs.about')}
-              </TabsTrigger>
-            )}
-            {tabConfig.showReviews && (
-              <TabsTrigger
-                value="reviews"
-                className="rounded-none border-b-2 border-transparent px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap transition-colors store-tab-trigger"
-                style={{
-                  color: theme.textColor,
-                  borderBottomColor: 'transparent',
-                }}
-              >
-                {t('storefront.tabs.reviews')}
-              </TabsTrigger>
-            )}
-            {tabConfig.showContact && (
-              <TabsTrigger
-                value="contact"
-                className="rounded-none border-b-2 border-transparent px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap transition-colors store-tab-trigger"
-                style={{
-                  color: theme.textColor,
-                  borderBottomColor: 'transparent',
-                }}
-              >
-                {t('storefront.tabs.contact')}
-              </TabsTrigger>
-            )}
-          </TabsList>
-          <ScrollBar orientation="horizontal" className="invisible" />
-        </ScrollArea>
+        {isVertical || isMega ? (
+          <div className="w-full px-0">{tabsList}</div>
+        ) : (
+          <ScrollArea className="w-full">
+            {tabsList}
+            <ScrollBar orientation="horizontal" className="invisible" />
+          </ScrollArea>
+        )}
       </div>
 
       <TabsContent value="products" className="mt-4 sm:mt-6">

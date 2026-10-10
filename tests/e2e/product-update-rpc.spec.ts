@@ -145,6 +145,249 @@ test.describe('Product update RPC — Sprint 2', () => {
     await admin.auth.admin.deleteUser(userId);
   });
 
+  test('update_physical_product_tx preserves variant id and quantity_reserved', async () => {
+    const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
+    const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const email = `e2e-reserved-${runId}@example.com`;
+    const password = `E2E!${runId}aA1`;
+
+    const { data: createdUser, error: userError } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    expect(userError).toBeNull();
+    const userId = createdUser.user!.id;
+
+    const { data: storeData, error: storeError } = await admin
+      .from('stores')
+      .insert({
+        user_id: userId,
+        name: `E2E Reserved ${runId}`,
+        slug: slugify(`e2e-reserved-${runId}`),
+        is_active: true,
+        commerce_type: 'physical',
+      })
+      .select('id')
+      .single();
+    expect(storeError).toBeNull();
+    const storeId = (storeData as { id: string }).id;
+
+    const slug = slugify(`physical-reserved-${runId}`);
+    const { data: createResult, error: createError } = await admin.rpc(
+      'create_physical_product_tx',
+      {
+        p_store_id: storeId,
+        p_product: {
+          name: `Produit reserved ${runId}`,
+          slug,
+          description: 'Reserved stock test',
+          price: 10000,
+          currency: 'XOF',
+          is_draft: false,
+          is_active: true,
+        },
+        p_physical: {
+          sku: `SKU-RES-${runId}`,
+          track_inventory: true,
+          has_variants: true,
+          option1_name: 'Taille',
+        },
+        p_variants: [
+          {
+            option1_value: 'M',
+            price: 10000,
+            sku: `SKU-M-${runId}`,
+          },
+        ],
+        p_inventory: [
+          {
+            location_name: 'Default',
+            quantity_available: 20,
+            low_stock_threshold: 5,
+            track_inventory: true,
+          },
+        ],
+      }
+    );
+    expect(createError).toBeNull();
+
+    const created = createResult as {
+      product_id: string;
+      physical_product_id: string;
+    };
+
+    const { data: variantRow, error: variantError } = await admin
+      .from('physical_product_variants')
+      .select('id')
+      .eq('physical_product_id', created.physical_product_id)
+      .single();
+    expect(variantError).toBeNull();
+    const variantId = (variantRow as { id: string }).id;
+
+    const { error: reserveError } = await admin
+      .from('physical_product_inventory')
+      .update({ quantity_reserved: 3 })
+      .eq('physical_product_id', created.physical_product_id)
+      .eq('variant_id', variantId);
+    expect(reserveError).toBeNull();
+
+    const { error: updateError } = await admin.rpc('update_physical_product_tx', {
+      p_store_id: storeId,
+      p_product_id: created.product_id,
+      p_product: {
+        name: `Produit reserved upd ${runId}`,
+        slug,
+        price: 11000,
+      },
+      p_physical: {
+        sku: `SKU-RES-${runId}`,
+        track_inventory: true,
+        has_variants: true,
+        option1_name: 'Taille',
+      },
+      p_variants: [
+        {
+          id: variantId,
+          option1_value: 'M',
+          price: 11000,
+          sku: `SKU-M-${runId}`,
+        },
+      ],
+      p_inventory: [
+        {
+          location_name: 'Default',
+          quantity_available: 18,
+          low_stock_threshold: 5,
+          track_inventory: true,
+        },
+      ],
+    });
+    expect(updateError).toBeNull();
+
+    const { data: variantsAfter } = await admin
+      .from('physical_product_variants')
+      .select('id, price')
+      .eq('physical_product_id', created.physical_product_id);
+    expect(variantsAfter).toHaveLength(1);
+    expect(variantsAfter?.[0]?.id).toBe(variantId);
+    expect(Number(variantsAfter?.[0]?.price)).toBe(11000);
+
+    const { data: invAfter } = await admin
+      .from('physical_product_inventory')
+      .select('quantity_available, quantity_reserved, variant_id')
+      .eq('physical_product_id', created.physical_product_id)
+      .single();
+    expect(invAfter?.variant_id).toBe(variantId);
+    expect(Number(invAfter?.quantity_available)).toBe(18);
+    expect(Number(invAfter?.quantity_reserved)).toBe(3);
+
+    await admin.from('products').delete().eq('id', created.product_id);
+    await admin.from('stores').delete().eq('id', storeId);
+    await admin.auth.admin.deleteUser(userId);
+  });
+
+  test('update_digital_product_tx syncs digital_product_files atomically', async () => {
+    const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
+    const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const email = `e2e-digital-files-${runId}@example.com`;
+    const password = `E2E!${runId}aA1`;
+
+    const { data: createdUser } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    const userId = createdUser.user!.id;
+
+    const { data: storeData } = await admin
+      .from('stores')
+      .insert({
+        user_id: userId,
+        name: `E2E Digital Files ${runId}`,
+        slug: slugify(`e2e-digital-files-${runId}`),
+        is_active: true,
+      })
+      .select('id')
+      .single();
+    const storeId = (storeData as { id: string }).id;
+
+    const slug = slugify(`digital-files-${runId}`);
+    const { data: createResult, error: createError } = await admin.rpc(
+      'create_digital_product_tx',
+      {
+        p_store_id: storeId,
+        p_product: {
+          name: `Digital files ${runId}`,
+          slug,
+          price: 5000,
+          category: 'ebook',
+          is_active: true,
+          is_draft: false,
+        },
+        p_digital: {
+          digital_type: 'ebook',
+          main_file_url: 'https://example.com/v1.pdf',
+        },
+        p_files: [
+          {
+            name: 'v1.pdf',
+            file_url: 'https://example.com/v1.pdf',
+            file_type: 'pdf',
+            file_size_mb: 1,
+            order_index: 0,
+            is_main: true,
+            is_preview: false,
+            requires_purchase: true,
+            version: '1.0',
+          },
+        ],
+      }
+    );
+    expect(createError).toBeNull();
+
+    const created = createResult as { product_id: string; digital_product_id: string };
+
+    const { error: updateError } = await admin.rpc('update_digital_product_tx', {
+      p_store_id: storeId,
+      p_product_id: created.product_id,
+      p_product: { name: `Digital files upd ${runId}` },
+      p_digital: {
+        digital_type: 'ebook',
+        main_file_url: 'https://example.com/v2.pdf',
+        main_file_version: '2.0',
+        version: '2.0',
+      },
+      p_files: [
+        {
+          name: 'v2.pdf',
+          file_url: 'https://example.com/v2.pdf',
+          file_type: 'pdf',
+          file_size_mb: 2,
+          order_index: 0,
+          is_main: true,
+          is_preview: false,
+          requires_purchase: true,
+          version: '2.0',
+        },
+      ],
+    });
+    expect(updateError).toBeNull();
+
+    const { data: files } = await admin
+      .from('digital_product_files')
+      .select('file_url, version, is_main')
+      .eq('digital_product_id', created.digital_product_id);
+    expect(files).toHaveLength(1);
+    expect(files?.[0]?.file_url).toBe('https://example.com/v2.pdf');
+    expect(files?.[0]?.version).toBe('2.0');
+    expect(files?.[0]?.is_main).toBe(true);
+
+    await admin.from('products').delete().eq('id', created.product_id);
+    await admin.from('stores').delete().eq('id', storeId);
+    await admin.auth.admin.deleteUser(userId);
+  });
+
   test('update_digital_product_tx rejects cross-store access', async () => {
     const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
     const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;

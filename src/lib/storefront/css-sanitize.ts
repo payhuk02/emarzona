@@ -15,6 +15,8 @@ export const ALLOWED_STORE_FONTS = new Set([
   'Merriweather',
   'Source Sans Pro',
   'Raleway',
+  'Ubuntu',
+  'Nunito',
 ]);
 
 const CSS_SIZE = /^([0-9.]+(px|rem|em|%)|normal)$/;
