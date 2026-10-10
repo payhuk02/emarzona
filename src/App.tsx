@@ -9,7 +9,6 @@ import { StoreProvider } from '@/contexts/StoreContext';
 import { PlatformCustomizationProvider } from '@/contexts/PlatformCustomizationContext';
 import { ProgressiveUXProvider } from '@/contexts/ProgressiveUXContext';
 import { SubdomainMiddleware } from '@/components/multi-tenant/SubdomainMiddleware';
-import { ScrollToTop } from '@/components/navigation/ScrollToTop';
 import { LoadingBar } from '@/components/navigation/LoadingBar';
 import { useScrollRestoration } from '@/hooks/useScrollRestoration';
 import { useDarkMode } from '@/hooks/useDarkMode';
@@ -50,6 +49,11 @@ const CookieConsentBanner = lazy(() =>
 );
 const CrispChat = lazy(() =>
   import('@/components/chat/CrispChat').then(m => ({ default: m.CrispChat }))
+);
+const ContactChatWidget = lazy(() =>
+  import('@/components/support/ContactChatWidget').then(m => ({
+    default: m.ContactChatWidget,
+  }))
 );
 const BottomNavigation = lazy(() =>
   import('@/components/mobile/BottomNavigation').then(m => ({ default: m.BottomNavigation }))
@@ -306,7 +310,6 @@ const AppContent = () => {
           <AutoSEO />
         </Suspense>
         <LoadingBar />
-        <ScrollToTop />
         <Suspense fallback={null}>
           <PerformanceOptimizer />
           <DeferredCurrencyRatesInitializer />
@@ -335,6 +338,7 @@ const AppContent = () => {
         <Suspense fallback={null}>
           <CookieConsentBanner />
           <CrispChat />
+          <ContactChatWidget />
         </Suspense>
         <Suspense fallback={null}>
           {isBottomNavVisible && <BottomNavigation position="bottom" />}

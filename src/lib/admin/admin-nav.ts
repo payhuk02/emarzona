@@ -449,6 +449,11 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         permissions: ['disputes.manage'],
       },
       {
+        icon: MessageSquare,
+        label: 'Messages contact',
+        path: '/admin/contact-messages',
+      },
+      {
         icon: Bell,
         label: 'Notifications',
         path: '/admin/notifications',

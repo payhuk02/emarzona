@@ -72,6 +72,7 @@ const AdminShippingConversations = lazyPage(
   () => import('@/pages/admin/AdminShippingConversations')
 );
 const AdminVendorConversations = lazyPage(() => import('@/pages/admin/AdminVendorConversations'));
+const AdminContactMessages = lazyPage(() => import('@/pages/admin/AdminContactMessages'));
 const AdminCourses = lazyPage(() => import('@/pages/admin/AdminCourses'));
 const AdminSecurity = lazyPage(() => import('@/pages/admin/AdminSecurity'));
 const AdminAudit = lazyPage(() => import('@/pages/admin/AdminAudit'));
@@ -171,6 +172,7 @@ export const adminRoutes = (
     {page('/admin/shipping', AdminShipping)}
     {page('/admin/shipping-conversations', AdminShippingConversations)}
     {page('/admin/vendor-conversations', AdminVendorConversations)}
+    {page('/admin/contact-messages', AdminContactMessages)}
     {page('/admin/courses', AdminCourses)}
     {page('/admin/security', AdminSecurity)}
     {page('/admin/audit', AdminAudit)}

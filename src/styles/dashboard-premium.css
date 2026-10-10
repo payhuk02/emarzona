@@ -1,6 +1,6 @@
 /**
- * Tableau de bord premium — surfaces calmes, brand orange/bleu Emarzona.
- * Pas de glass violet / glow orbs (aligné design system).
+ * Tableau de bord premium — dégradé bleu ciel → blanc,
+ * cartes blanches, brand orange/bleu Emarzona. Pas de glow orbs.
  */
 
 .dashboard-premium {
@@ -27,25 +27,27 @@
 }
 
 .landing-premium.app-premium #main-content:has(.dashboard-premium) {
-  /* Dégradé bleu ciel premium — contraste avec titres noirs (#000 via app-premium) */
+  /* Dégradé premium vertical — bleu ciel doux → blanc */
   background: linear-gradient(
     180deg,
-    rgba(56, 189, 248, 0.24) 0%,
-    rgba(125, 211, 252, 0.14) 26%,
-    rgba(224, 242, 254, 0.85) 55%,
-    #f0f9ff 100%
+    #d4f1f7 0%,
+    #e8f7fb 28%,
+    #f5fcfd 55%,
+    #ffffff 100%
   ) !important;
+  background-attachment: fixed !important;
 }
 
 .dark .landing-premium.app-premium #main-content:has(.dashboard-premium) {
+  /* Même dégradé (shell dashboard reste clair) */
   background: linear-gradient(
-    165deg,
-    #7dd3fc 0%,
-    #bae6fd 24%,
-    #e0f2fe 52%,
-    #f0f9ff 78%,
-    #f8fafc 100%
+    180deg,
+    #d4f1f7 0%,
+    #e8f7fb 28%,
+    #f5fcfd 55%,
+    #ffffff 100%
   ) !important;
+  background-attachment: fixed !important;
 }
 
 /* Carte KPI */

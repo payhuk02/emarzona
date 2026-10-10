@@ -27,6 +27,14 @@ export const FILE_VALIDATION_CONFIG = {
     'video/mp4',
     'video/webm',
     'video/quicktime',
+    // Audio (messages vocaux)
+    'audio/webm',
+    'audio/ogg',
+    'audio/mpeg',
+    'audio/mp4',
+    'audio/wav',
+    'audio/x-wav',
+    'audio/aac',
     // Documents
     'application/pdf',
     'text/plain',
@@ -49,6 +57,12 @@ export const FILE_VALIDATION_CONFIG = {
     '.mp4',
     '.webm',
     '.mov',
+    // Audio
+    '.ogg',
+    '.mp3',
+    '.wav',
+    '.m4a',
+    '.aac',
     // Documents
     '.pdf',
     '.txt',
@@ -168,15 +182,11 @@ export function validateFile(
     };
   }
 
-  // 4. Vérifier le type MIME
-  let detectedMimeType = file.type;
+  // 4. Vérifier le type MIME (strip codecs params e.g. audio/webm;codecs=opus)
+  let detectedMimeType = (file.type || '').split(';')[0].trim();
 
   // Si le type MIME est vide ou incorrect, essayer de le détecter depuis l'extension
-  if (
-    !detectedMimeType ||
-    detectedMimeType === 'application/octet-stream' ||
-    detectedMimeType === ''
-  ) {
+  if (!detectedMimeType || detectedMimeType === 'application/octet-stream') {
     detectedMimeType = detectMimeTypeFromExtension(fileExtension);
   }
 
@@ -271,7 +281,12 @@ function detectMimeTypeFromExtension(extension: string): string {
     '.webm': 'video/webm',
     '.mov': 'video/quicktime',
     '.avi': 'video/x-msvideo',
-    '.ogg': 'video/ogg',
+    // Audio
+    '.ogg': 'audio/ogg',
+    '.mp3': 'audio/mpeg',
+    '.wav': 'audio/wav',
+    '.m4a': 'audio/mp4',
+    '.aac': 'audio/aac',
     // Documents
     '.pdf': 'application/pdf',
     '.txt': 'text/plain',
