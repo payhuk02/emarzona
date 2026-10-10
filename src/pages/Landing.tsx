@@ -7,7 +7,10 @@ import { SoftwareApplicationSchema } from '@/components/seo/SoftwareApplicationS
 import { PremiumLandingPage } from '@/components/landing/premium/PremiumLandingPage';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { injectLandingCriticalCSS } from '@/lib/landing-critical-css';
-import { ensureLandingPremiumLocale } from '@/i18n/landing-premium-loader';
+import {
+  ensureLandingPremiumLocale,
+  isLandingPremiumLocaleLoaded,
+} from '@/i18n/landing-premium-loader';
 import i18n from '@/i18n/config';
 import {
   buildLandingHreflangAlternates,
@@ -15,14 +18,10 @@ import {
   resolveLandingPageSEO,
 } from '@/lib/landing-seo';
 
-/** Critical CSS only — do not preload below-the-fold carousel (steals LCP bandwidth). */
+/** Critical CSS only — no continuous smooth-scroll (hurts scroll fluidity). */
 function useLandingAssets() {
   useEffect(() => {
     injectLandingCriticalCSS();
-    document.documentElement.classList.add('lp-smooth-scroll');
-    return () => {
-      document.documentElement.classList.remove('lp-smooth-scroll');
-    };
   }, []);
 }
 
@@ -37,24 +36,47 @@ function LandingShell() {
   );
 }
 
+function resolveLandingLang(search: string): string {
+  return parseLandingLangFromSearch(search) ?? 'fr';
+}
+
 const Landing = () => {
-  const [ready, setReady] = useState(false);
   const location = useLocation();
+  const landingLang = resolveLandingLang(location.search);
+  // FR/EN already in initial i18n bundle — paint immediately (no empty shell flash)
+  const [ready, setReady] = useState(() => isLandingPremiumLocaleLoaded(landingLang));
   useLandingAssets();
 
   const hreflangAlternates = useMemo(() => buildLandingHreflangAlternates(), []);
 
   useEffect(() => {
     let cancelled = false;
-    const langFromUrl = parseLandingLangFromSearch(location.search);
-    const landingLang = langFromUrl ?? 'fr';
+    const lang = resolveLandingLang(location.search);
 
-    ensureLandingPremiumLocale(landingLang)
+    if (isLandingPremiumLocaleLoaded(lang)) {
+      if (i18n.language !== lang) {
+        void i18n.changeLanguage(lang).then(() => {
+          if (!cancelled) {
+            document.documentElement.lang = lang;
+            setReady(true);
+          }
+        });
+      } else {
+        document.documentElement.lang = lang;
+        setReady(true);
+      }
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setReady(false);
+    ensureLandingPremiumLocale(lang)
       .then(async () => {
-        if (i18n.language !== landingLang) {
-          await i18n.changeLanguage(landingLang);
+        if (i18n.language !== lang) {
+          await i18n.changeLanguage(lang);
         }
-        document.documentElement.lang = landingLang;
+        document.documentElement.lang = lang;
         if (!cancelled) setReady(true);
       })
       .catch(() => {

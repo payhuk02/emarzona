@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 
-const TYPING_MS = 28;
-const DELETING_MS = 16;
-const PAUSE_FULL_MS = 2600;
-const PAUSE_EMPTY_MS = 700;
+const TYPING_MS = 36;
+const DELETING_MS = 22;
+const PAUSE_FULL_MS = 2800;
+const PAUSE_EMPTY_MS = 800;
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -24,12 +24,29 @@ export function PremiumHeroTypewriterBadge() {
   const fullText = t('hero.typewriterBadge');
   const [displayed, setDisplayed] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [inView, setInView] = useState(true);
+  const rootRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        setInView(entries.some(e => e.isIntersecting));
+      },
+      { rootMargin: '40px', threshold: 0.05 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (reducedMotion) {
       setDisplayed(fullText);
       return;
     }
+    if (!inView || document.hidden) return;
 
     let timeout: number;
 
@@ -48,10 +65,11 @@ export function PremiumHeroTypewriterBadge() {
     }
 
     return () => window.clearTimeout(timeout);
-  }, [displayed, fullText, isDeleting, reducedMotion]);
+  }, [displayed, fullText, inView, isDeleting, reducedMotion]);
 
   return (
     <p
+      ref={rootRef}
       className="lp-hero-typewriter-badge mb-5 w-full self-center lg:self-start"
       aria-live="polite"
     >

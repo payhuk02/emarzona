@@ -17,18 +17,24 @@ export function prefetchLandingSponsoredProducts(queryClient: QueryClient) {
   });
 }
 
-/** Prefetch données + chunk JS + images dès le montage landing. */
+/**
+ * Prefetch après LCP : idle + window load, pour ne pas concurrencer le hero.
+ * La section différée (rootMargin) déclenche aussi le fetch via useQuery.
+ */
 export function usePrefetchLandingSponsoredProducts() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
     let cancelled = false;
+    let idleId: number | undefined;
+    let timeoutId: number | undefined;
 
     const warmChunk = () => {
       void import('@/components/landing/premium/SponsoredProductsSection');
     };
 
     const run = async () => {
+      if (cancelled) return;
       try {
         await prefetchLandingSponsoredProducts(queryClient);
         if (cancelled) return;
@@ -36,27 +42,36 @@ export function usePrefetchLandingSponsoredProducts() {
           | Awaited<ReturnType<typeof fetchLandingSponsoredProducts>>
           | undefined;
         if (cached?.length) {
-          preloadLandingSponsoredImages(cached, 9);
+          preloadLandingSponsoredImages(cached, 6);
         }
+        warmChunk();
       } catch {
         // retry via useQuery au mount de la section
       }
     };
 
-    void run();
+    const schedule = () => {
+      if (cancelled) return;
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        idleId = window.requestIdleCallback(() => void run(), { timeout: 4000 });
+      } else {
+        timeoutId = window.setTimeout(() => void run(), 1200);
+      }
+    };
 
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(warmChunk, { timeout: 1800 });
-      return () => {
-        cancelled = true;
-        window.cancelIdleCallback(id);
-      };
+    if (typeof document !== 'undefined' && document.readyState === 'complete') {
+      schedule();
+    } else {
+      window.addEventListener('load', schedule, { once: true });
     }
 
-    const t = window.setTimeout(warmChunk, 400);
     return () => {
       cancelled = true;
-      window.clearTimeout(t);
+      window.removeEventListener('load', schedule);
+      if (idleId !== undefined && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
     };
   }, [queryClient]);
 }

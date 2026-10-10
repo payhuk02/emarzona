@@ -64,7 +64,8 @@ export function PremiumLandingPage() {
           <PremiumPlatformHero />
         </ErrorBoundary>
 
-        <LandingDeferredSection minHeight="32rem" rootMargin="80px 0px">
+        {/* rootMargin serré : ne pas voler la bande passante LCP du platform hero */}
+        <LandingDeferredSection minHeight="32rem" rootMargin="60px 0px">
           <ErrorBoundary level="section">
             <Suspense fallback={<DeferredFallback minHeight="32rem" className="bg-[#08080a]" />}>
               <PremiumHero />
@@ -72,7 +73,7 @@ export function PremiumLandingPage() {
           </ErrorBoundary>
         </LandingDeferredSection>
 
-        <LandingDeferredSection minHeight="28rem">
+        <LandingDeferredSection minHeight="28rem" rootMargin="220px 0px">
           <ErrorBoundary level="section">
             <Suspense fallback={<DeferredFallback minHeight="28rem" />}>
               <SellWaysSection />
@@ -80,7 +81,7 @@ export function PremiumLandingPage() {
           </ErrorBoundary>
         </LandingDeferredSection>
 
-        <LandingDeferredSection minHeight="24rem">
+        <LandingDeferredSection minHeight="24rem" rootMargin="220px 0px">
           <ErrorBoundary level="section">
             <Suspense fallback={<DeferredFallback minHeight="24rem" />}>
               <FeaturesGridSection />
@@ -88,7 +89,7 @@ export function PremiumLandingPage() {
           </ErrorBoundary>
         </LandingDeferredSection>
 
-        <LandingDeferredSection minHeight="20rem">
+        <LandingDeferredSection minHeight="20rem" rootMargin="200px 0px">
           <ErrorBoundary level="section">
             <Suspense fallback={<DeferredFallback minHeight="20rem" />}>
               <AdaptSection />
@@ -96,7 +97,7 @@ export function PremiumLandingPage() {
           </ErrorBoundary>
         </LandingDeferredSection>
 
-        <LandingDeferredSection minHeight="10rem">
+        <LandingDeferredSection minHeight="10rem" rootMargin="180px 0px">
           <ErrorBoundary level="section">
             <Suspense fallback={<DeferredFallback minHeight="10rem" />}>
               <StoresMarqueeSection />
@@ -104,7 +105,7 @@ export function PremiumLandingPage() {
           </ErrorBoundary>
         </LandingDeferredSection>
 
-        <LandingDeferredSection minHeight="22rem">
+        <LandingDeferredSection minHeight="22rem" rootMargin="180px 0px">
           <ErrorBoundary level="section">
             <Suspense fallback={<DeferredFallback minHeight="22rem" className="bg-[#08080a]" />}>
               <CountriesMarqueeSection />
@@ -112,7 +113,7 @@ export function PremiumLandingPage() {
           </ErrorBoundary>
         </LandingDeferredSection>
 
-        <LandingDeferredSection minHeight="22rem">
+        <LandingDeferredSection minHeight="22rem" rootMargin="180px 0px">
           <ErrorBoundary level="section">
             <Suspense fallback={<DeferredFallback minHeight="22rem" />}>
               <CurrenciesMarqueeSection />
@@ -120,7 +121,7 @@ export function PremiumLandingPage() {
           </ErrorBoundary>
         </LandingDeferredSection>
 
-        <LandingDeferredSection minHeight="32rem">
+        <LandingDeferredSection minHeight="32rem" rootMargin="200px 0px">
           <ErrorBoundary level="section">
             <Suspense fallback={<DeferredFallback minHeight="32rem" />}>
               <PricingSection />
@@ -128,7 +129,7 @@ export function PremiumLandingPage() {
           </ErrorBoundary>
         </LandingDeferredSection>
 
-        <LandingDeferredSection minHeight="36rem" rootMargin="480px 0px">
+        <LandingDeferredSection minHeight="36rem" rootMargin="320px 0px">
           <ErrorBoundary level="section">
             <Suspense fallback={<SponsoredProductsSectionFallback />}>
               <SponsoredProductsSection />
@@ -136,7 +137,7 @@ export function PremiumLandingPage() {
           </ErrorBoundary>
         </LandingDeferredSection>
 
-        <LandingDeferredSection minHeight="18rem">
+        <LandingDeferredSection minHeight="18rem" rootMargin="160px 0px">
           <ErrorBoundary level="section">
             <Suspense fallback={<DeferredFallback minHeight="18rem" />}>
               <FinalCtaSection />
@@ -145,7 +146,7 @@ export function PremiumLandingPage() {
         </LandingDeferredSection>
       </main>
 
-      <LandingDeferredSection minHeight="16rem" rootMargin="200px 0px">
+      <LandingDeferredSection minHeight="16rem" rootMargin="140px 0px">
         <ErrorBoundary level="section">
           <Suspense fallback={<DeferredFallback minHeight="16rem" />}>
             <PremiumFooter />

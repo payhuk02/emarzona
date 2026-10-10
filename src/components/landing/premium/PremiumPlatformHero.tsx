@@ -206,25 +206,33 @@ export function PremiumPlatformHero() {
     >
       <div className="lp-platform-hero__visual-layer pointer-events-none absolute inset-0 z-[1]">
         <div className="lp-platform-hero__carousel absolute inset-0">
-          {visibleSlides.map((slide, index) => (
-            <div
-              key={slide.key}
-              className={`lp-platform-hero__slide ${index === active ? 'is-active' : ''}`}
-              aria-hidden={index !== active}
-            >
-              {slide.src ? (
-                <img
-                  src={slide.src}
-                  alt={slide.alt}
-                  className="lp-platform-hero__slide-img"
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                  fetchPriority={index === 0 ? 'high' : 'auto'}
-                  decoding="async"
-                  draggable={false}
-                />
-              ) : null}
-            </div>
-          ))}
+          {visibleSlides.map((slide, index) => {
+            const isActive = index === active;
+            const prevIdx = (active - 1 + slideCount) % slideCount;
+            const nextIdx = (active + 1) % slideCount;
+            // Active + voisines pour crossfade fluide ; LCP = slide 0 eager
+            const mountImg = isActive || index === prevIdx || index === nextIdx || index === 0;
+            return (
+              <div
+                key={slide.key}
+                className={`lp-platform-hero__slide ${isActive ? 'is-active' : ''}`}
+                aria-hidden={!isActive}
+              >
+                {slide.src && mountImg ? (
+                  <img
+                    src={slide.src}
+                    alt={isActive ? slide.alt : ''}
+                    className="lp-platform-hero__slide-img"
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    fetchPriority={index === 0 ? 'high' : 'low'}
+                    decoding="async"
+                    sizes="100vw"
+                    draggable={false}
+                  />
+                ) : null}
+              </div>
+            );
+          })}
           {visibleSlides.length === 0 ? (
             <div className="lp-platform-hero__slide is-active lp-platform-hero__slide--empty" />
           ) : null}
