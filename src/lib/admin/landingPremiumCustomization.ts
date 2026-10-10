@@ -159,7 +159,7 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
       text(
         'platformHero.titleFontSizeMax',
         'Titre — taille max (desktop)',
-        '6.5',
+        '7.75',
         'Agrandir / diminuer le titre sur grand écran. Nombre = rem.'
       ),
       text(
@@ -180,7 +180,7 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
         '0.9375',
         'Taille des libellés des 5 verticales. Nombre = rem.'
       ),
-      text('platformHero.titleFontWeight', 'Titre — graisse', '700', 'Ex. 400, 600, 700, 800.'),
+      text('platformHero.titleFontWeight', 'Titre — graisse', '800', 'Ex. 400, 600, 700, 800.'),
       text(
         'platformHero.subtitleFontWeight',
         'Sous-titre — graisse',

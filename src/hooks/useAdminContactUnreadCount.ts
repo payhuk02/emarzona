@@ -3,7 +3,7 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { fetchAdminContactUnreadTotal } from '@/lib/support/platform-contact';
+import { fetchAdminContactUnreadTotal } from '@/lib/support/platform-contact-unread';
 import { logger } from '@/lib/logger';
 
 const POLL_MS = 45_000;

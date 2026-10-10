@@ -340,8 +340,12 @@ export const EditCourseProductWizard = ({
   const { toast } = useToast();
   const { user } = useAuth();
   const { store: hookStore, loading: storeLoading } = useStore();
-  const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
-  const storeId = propsStoreId || store?.id;
+  const storeId = propsStoreId || hookStore?.id;
+  const store = storeId
+    ? hookStore?.id === storeId
+      ? hookStore
+      : { id: storeId, slug: hookStore?.slug }
+    : null;
   const invalidateCatalog = useCatalogCacheInvalidation();
 
   // Load existing course with security validation and cache optimisé
@@ -468,7 +472,7 @@ export const EditCourseProductWizard = ({
         const { data: existing } = await supabase
           .from('products')
           .select('id')
-          .eq('store_id', store.id)
+          .eq('store_id', storeId)
           .eq('slug', slug)
           .neq('id', productId)
           .limit(1);
@@ -509,8 +513,12 @@ export const EditCourseProductWizard = ({
         })),
       }));
 
+      if (!storeId) {
+        throw new Error('Boutique introuvable pour ce produit');
+      }
+
       await updateFullCourseTx({
-        storeId: store.id,
+        storeId,
         productId,
         product: {
           name: formData.title,
@@ -569,7 +577,7 @@ export const EditCourseProductWizard = ({
 
       await persistProductWhatsApp(productId, formData.whatsapp_number, formData.whatsapp_enabled);
 
-      triggerProductUpdatedWebhook(store.id, {
+      triggerProductUpdatedWebhook(storeId, {
         product_id: productId,
         name: formData.title,
         product_type: 'course',
@@ -604,7 +612,7 @@ export const EditCourseProductWizard = ({
     affiliateData,
     pixelsData,
     productId,
-    store,
+    storeId,
     onSuccess,
     toast,
     invalidateCatalog,

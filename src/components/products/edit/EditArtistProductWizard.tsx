@@ -173,7 +173,12 @@ export const EditArtistProductWizard = ({
   const invalidateCatalog = useCatalogCacheInvalidation();
   const { user } = useAuth();
   const { store: hookStore, loading: storeLoading } = useStore();
-  const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
+  const storeId = propsStoreId || hookStore?.id;
+  const store = storeId
+    ? hookStore?.id === storeId
+      ? hookStore
+      : { id: storeId, slug: (hookStore as { slug?: string } | null)?.slug }
+    : null;
 
   // Load existing product with security validation
   const {
@@ -409,7 +414,7 @@ export const EditArtistProductWizard = ({
   );
 
   const updateArtistProduct = async (isDraft: boolean = false) => {
-    if (!store || !artistProductData) {
+    if (!storeId || !artistProductData) {
       throw new Error('Aucune boutique ou produit trouvé');
     }
 
@@ -472,7 +477,7 @@ export const EditArtistProductWizard = ({
             shipping_handling_time: sanitizedData.shipping_handling_time,
             shipping_insurance_amount: sanitizedData.shipping_insurance_amount,
           },
-          store.id
+          storeId!
         );
 
         if (!validationResult.valid) {
@@ -482,6 +487,10 @@ export const EditArtistProductWizard = ({
             'Erreur de validation';
           throw new Error(errorMessage);
         }
+      }
+
+      if (!storeId) {
+        throw new Error('Boutique introuvable pour ce produit');
       }
 
       const productPayload: Record<string, unknown> = {
@@ -543,7 +552,7 @@ export const EditArtistProductWizard = ({
         signature_location: sanitizedData.signature_location,
       };
 
-      await updateArtistProductTx(store.id, productId, productPayload, artistPayload);
+      await updateArtistProductTx(storeId, productId, productPayload, artistPayload);
 
       await persistProductWhatsApp(productId, formData.whatsapp_number, formData.whatsapp_enabled);
 
@@ -555,7 +564,7 @@ export const EditArtistProductWizard = ({
 
       const affiliateData = {
         product_id: productId,
-        store_id: store.id,
+        store_id: storeId,
         affiliate_enabled: formData.affiliate?.enabled ?? false,
         commission_rate: formData.affiliate?.commission_rate ?? 10,
         commission_type: formData.affiliate?.commission_type ?? 'percentage',
@@ -582,8 +591,8 @@ export const EditArtistProductWizard = ({
 
       localStorage.removeItem('artist-product-draft');
 
-      if (!isDraft && store?.id) {
-        triggerProductUpdatedWebhook(store.id, {
+      if (!isDraft && storeId) {
+        triggerProductUpdatedWebhook(storeId, {
           product_id: artistProductData.product_id,
           name: formData.artwork_title || formData.name,
           product_type: 'artist',

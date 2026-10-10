@@ -2,7 +2,6 @@
  * Client helpers for platform contact chat (user ↔ admin) + media attachments.
  */
 import { supabase } from '@/integrations/supabase/client';
-import { uploadFileToStorage } from '@/services/fileUploadService';
 import { ATTACHMENTS_BUCKET } from '@/lib/attachments/storage-ref';
 
 export type PlatformContactThread = {
@@ -142,6 +141,8 @@ async function uploadAndLinkAttachments(
   userId: string,
   files: PendingContactMedia[]
 ): Promise<void> {
+  // Dynamic import keeps browser-image-compression out of app-core / admin chrome.
+  const { uploadFileToStorage } = await import('@/services/fileUploadService');
   for (const item of files.slice(0, MAX_ATTACHMENTS)) {
     if (item.file.size > MAX_FILE_BYTES) {
       throw new Error(`« ${item.file.name} » dépasse 10 Mo`);
@@ -279,19 +280,4 @@ export async function markAdminThreadRead(threadId: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function fetchAdminContactUnreadTotal(): Promise<number> {
-  const { data, error } = await rpc('platform_contact_admin_unread_total');
-  if (error) {
-    // Fallback if RPC not yet applied
-    const { data: rows, error: listErr } = await fromTable('platform_contact_threads')
-      .select('admin_unread_count')
-      .gt('admin_unread_count', 0);
-    if (listErr) throw error;
-    const sum = ((rows as { admin_unread_count: number }[]) ?? []).reduce(
-      (acc, r) => acc + (r.admin_unread_count || 0),
-      0
-    );
-    return sum;
-  }
-  return typeof data === 'number' ? data : Number(data) || 0;
-}
+export { fetchAdminContactUnreadTotal } from '@/lib/support/platform-contact-unread';

@@ -1,9 +1,26 @@
 /**
  * Renders platform contact message attachments (image / audio / file).
  */
+import { useCallback, type SyntheticEvent } from 'react';
 import { FileIcon, ImageOff } from 'lucide-react';
 import type { PlatformContactAttachment } from '@/lib/support/platform-contact';
 import { cn } from '@/lib/utils';
+
+/** Chrome often reports Infinity/NaN for MediaRecorder WebM until we force a seek. */
+function recoverAudioDuration(e: SyntheticEvent<HTMLAudioElement>) {
+  const audio = e.currentTarget;
+  if (Number.isFinite(audio.duration) && audio.duration > 0) return;
+  const onTimeUpdate = () => {
+    audio.removeEventListener('timeupdate', onTimeUpdate);
+    audio.currentTime = 0;
+  };
+  audio.addEventListener('timeupdate', onTimeUpdate);
+  try {
+    audio.currentTime = 1e101;
+  } catch {
+    /* ignore */
+  }
+}
 
 export function ContactChatMedia({
   attachments,
@@ -12,6 +29,10 @@ export function ContactChatMedia({
   attachments: PlatformContactAttachment[];
   className?: string;
 }) {
+  const onAudioMeta = useCallback((e: SyntheticEvent<HTMLAudioElement>) => {
+    recoverAudioDuration(e);
+  }, []);
+
   if (!attachments?.length) return null;
 
   return (
@@ -65,6 +86,7 @@ export function ContactChatMedia({
                 preload="metadata"
                 className="w-full max-w-full h-9"
                 src={att.signedUrl}
+                onLoadedMetadata={onAudioMeta}
               >
                 <track kind="captions" />
               </audio>

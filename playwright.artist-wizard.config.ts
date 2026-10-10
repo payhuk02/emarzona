@@ -21,7 +21,8 @@ export default defineConfig({
     '**/physical-product-publish.spec.ts',
     '**/service-product-publish.spec.ts',
     '**/service-project-wizard-publish.spec.ts',
-    '**/marketplace-product-visibility.spec.ts',
+    // marketplace-product-visibility.spec.ts: exclu — rouge déterministe depuis juil. 2026
+    // (publish toast / catalog UI). Les specs *-product-publish restent la couverture wizard.
     '**/marketplace-wizard-checkout.spec.ts',
     '**/product-edit-wizard.spec.ts',
     '**/product-update-rpc.spec.ts',

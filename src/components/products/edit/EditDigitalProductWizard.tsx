@@ -325,8 +325,13 @@ export const EditDigitalProductWizard = ({
   const { toast } = useToast();
   const { user } = useAuth();
   const { store: hookStore, loading: storeLoading } = useStore();
-  const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
-  const storeId = propsStoreId || store?.id;
+  // Prefer props storeId (product's store) over context — context can be another boutique.
+  const storeId = propsStoreId || hookStore?.id;
+  const store = storeId
+    ? hookStore?.id === storeId
+      ? hookStore
+      : { id: storeId, slug: hookStore?.slug }
+    : null;
   const invalidateCatalog = useCatalogCacheInvalidation();
 
   // Load existing product with security validation and cache optimisé
@@ -566,7 +571,7 @@ export const EditDigitalProductWizard = ({
         const { data: existing } = await supabase
           .from('products')
           .select('id')
-          .eq('store_id', store.id)
+          .eq('store_id', storeId)
           .eq('slug', slug)
           .neq('id', productId)
           .limit(1);
@@ -653,17 +658,28 @@ export const EditDigitalProductWizard = ({
           ? { name: mainFile.name, size: mainFile.size, type: mainFile.format }
           : null,
       });
+      // NULL = leave files unchanged (RPC). Never send [] unless we intentionally cleared.
+      const filesForRpc =
+        filesPayload.length > 0
+          ? filesPayload
+          : !formData.main_file_url && !formData.downloadable_files?.length
+            ? []
+            : null;
 
       const affiliatePayload = toServiceAffiliateRpcPayload(formData.affiliate, {
         includeWhenDisabled: true,
       });
 
+      if (!storeId) {
+        throw new Error('Boutique introuvable pour ce produit');
+      }
+
       const rpcResult = await updateDigitalProductTx(
-        store.id,
+        storeId,
         productId,
         productPayload,
         digitalPayload,
-        filesPayload,
+        filesForRpc,
         affiliatePayload
       );
 
@@ -674,7 +690,7 @@ export const EditDigitalProductWizard = ({
         throw new Error('Enregistrement produit digital introuvable');
       }
 
-      triggerProductUpdatedWebhook(store.id, {
+      triggerProductUpdatedWebhook(storeId, {
         product_id: productId,
         name: formData.name,
         product_type: 'digital',
@@ -703,7 +719,7 @@ export const EditDigitalProductWizard = ({
     } finally {
       setIsSaving(false);
     }
-  }, [formData, productId, store, onSuccess, toast, invalidateCatalog]);
+  }, [formData, productId, storeId, onSuccess, toast, invalidateCatalog]);
 
   const handleNext = useCallback(async () => {
     const result = await validateStep(currentStep);

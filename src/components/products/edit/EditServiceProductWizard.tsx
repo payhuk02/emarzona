@@ -104,8 +104,12 @@ export const EditServiceProductWizard = ({
   const { toast } = useToast();
   const { user } = useAuth();
   const { store: hookStore, loading: storeLoading } = useStore();
-  const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
-  const storeId = propsStoreId || store?.id;
+  const storeId = propsStoreId || hookStore?.id;
+  const store = storeId
+    ? hookStore?.id === storeId
+      ? hookStore
+      : { id: storeId, slug: hookStore?.slug }
+    : null;
   const { tree: categoryTree } = useServiceCategoryTree();
   const invalidateCatalog = useCatalogCacheInvalidation();
 
@@ -337,7 +341,7 @@ export const EditServiceProductWizard = ({
         const { data: existing } = await supabase
           .from('products')
           .select('id')
-          .eq('store_id', store.id)
+          .eq('store_id', storeId)
           .eq('slug', slug)
           .neq('id', productId)
           .limit(1);
@@ -464,8 +468,12 @@ export const EditServiceProductWizard = ({
           is_required: true,
         }));
 
+      if (!storeId) {
+        throw new Error('Boutique introuvable pour ce produit');
+      }
+
       const rpcResult = await updateServiceProductTx(
-        store.id,
+        storeId,
         productId,
         productPayload,
         servicePayload,
@@ -486,7 +494,7 @@ export const EditServiceProductWizard = ({
         categoryTree,
         serviceProductId: rpcResult.service_product_id,
         productId,
-        storeId: store.id,
+        storeId,
       });
 
       const serviceProductId = rpcResult.service_product_id;
@@ -512,7 +520,7 @@ export const EditServiceProductWizard = ({
         ) : undefined,
       });
 
-      triggerProductUpdatedWebhook(store.id, {
+      triggerProductUpdatedWebhook(storeId, {
         product_id: productId,
         name: formData.name,
         product_type: 'service',
@@ -534,7 +542,7 @@ export const EditServiceProductWizard = ({
     } finally {
       setIsSaving(false);
     }
-  }, [formData, productId, store, onSuccess, toast, invalidateCatalog, navigate, categoryTree]);
+  }, [formData, productId, storeId, onSuccess, toast, invalidateCatalog, navigate, categoryTree]);
 
   const handleNext = useCallback(async () => {
     const result = await validateStep(currentStep);

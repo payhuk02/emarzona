@@ -39,9 +39,14 @@ import { ContactChatMessageList } from '@/components/support/ContactChatMessageL
 import { CameraCapture } from '@/components/camera/CameraCapture';
 import { EMARZONA_DEFAULT_LOGO_PUBLIC } from '@/lib/brand/emarzona-logo';
 import { describeMediaPermissionError } from '@/lib/support/media-permission-error';
+import {
+  finalizeVoiceRecording,
+  pickRecorderMime,
+  stopMediaRecorderAndWait,
+  VOICE_MAX_RECORD_SECS,
+} from '@/lib/support/voice-recording';
 
 const MAX_PENDING = 5;
-const MAX_RECORD_SECS = 120;
 
 function makePending(file: File): PendingContactMedia {
   const kind = detectContactMediaKind(file);
@@ -49,7 +54,8 @@ function makePending(file: File): PendingContactMedia {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     file,
     kind,
-    previewUrl: kind === 'image' ? URL.createObjectURL(file) : undefined,
+    // Object URL for images + audio so duration metadata can load before upload
+    previewUrl: kind === 'image' || kind === 'audio' ? URL.createObjectURL(file) : undefined,
   };
 }
 
@@ -57,21 +63,6 @@ function revokePending(items: PendingContactMedia[]) {
   items.forEach(p => {
     if (p.previewUrl) URL.revokeObjectURL(p.previewUrl);
   });
-}
-
-function pickRecorderMime(): { mimeType?: string; ext: string } {
-  if (typeof MediaRecorder === 'undefined') return { ext: 'webm' };
-  const candidates: Array<{ mimeType: string; ext: string }> = [
-    { mimeType: 'audio/webm;codecs=opus', ext: 'webm' },
-    { mimeType: 'audio/webm', ext: 'webm' },
-    { mimeType: 'audio/mp4', ext: 'm4a' },
-    { mimeType: 'audio/ogg;codecs=opus', ext: 'ogg' },
-    { mimeType: 'audio/ogg', ext: 'ogg' },
-  ];
-  for (const c of candidates) {
-    if (MediaRecorder.isTypeSupported(c.mimeType)) return c;
-  }
-  return { ext: 'webm' };
 }
 
 export function ContactChatWidget() {
@@ -105,6 +96,9 @@ export function ContactChatWidget() {
   const recordTimerRef = useRef<number | null>(null);
   const recordStreamRef = useRef<MediaStream | null>(null);
   const recordExtRef = useRef('webm');
+  /** Wall-clock ms — must survive stopVoice resetting React state before onstop. */
+  const recordDurationMsRef = useRef(0);
+  const voiceFinalizeRef = useRef<Promise<File | null> | null>(null);
   const aliveRef = useRef(true);
   const nameTouchedRef = useRef(false);
   const composerBlurTimerRef = useRef<number | null>(null);
@@ -302,6 +296,8 @@ export function ContactChatWidget() {
             })
           );
         }
+        // Keep ref in sync for send-while-recording (setState is async)
+        pendingRef.current = next;
         return next;
       });
     },
@@ -316,24 +312,23 @@ export function ContactChatWidget() {
     });
   };
 
-  const stopVoice = useCallback(() => {
+  const stopVoice = useCallback(async (): Promise<File | null> => {
     if (recordTimerRef.current) {
       window.clearInterval(recordTimerRef.current);
       recordTimerRef.current = null;
     }
     const recorder = mediaRecorderRef.current;
-    if (recorder && recorder.state !== 'inactive') {
-      try {
-        recorder.stop();
-      } catch {
-        recordStreamRef.current?.getTracks().forEach(t => t.stop());
-      }
-    } else {
-      recordStreamRef.current?.getTracks().forEach(t => t.stop());
-    }
     mediaRecorderRef.current = null;
     setRecording(false);
     setRecordSecs(0);
+    await stopMediaRecorderAndWait(recorder);
+    if (!recorder) {
+      recordStreamRef.current?.getTracks().forEach(t => t.stop());
+      return null;
+    }
+    const finalized = voiceFinalizeRef.current;
+    voiceFinalizeRef.current = null;
+    return finalized ? await finalized : null;
   }, []);
 
   const startVoice = async () => {
@@ -350,7 +345,13 @@ export function ContactChatWidget() {
       if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
         throw new Error('Enregistrement vocal non supporté sur cet appareil');
       }
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
       if (!aliveRef.current) {
         stream.getTracks().forEach(t => t.stop());
         return;
@@ -363,45 +364,59 @@ export function ContactChatWidget() {
         picked.mimeType ? { mimeType: picked.mimeType } : undefined
       );
       recordChunksRef.current = [];
+      recordDurationMsRef.current = 0;
+
+      let resolveFinalize: (file: File | null) => void = () => undefined;
+      voiceFinalizeRef.current = new Promise<File | null>(resolve => {
+        resolveFinalize = resolve;
+      });
+
       recorder.ondataavailable = e => {
         if (e.data.size > 0) recordChunksRef.current.push(e.data);
       };
       recorder.onstop = () => {
         stream.getTracks().forEach(t => t.stop());
         recordStreamRef.current = null;
-        if (!aliveRef.current) return;
-        const blob = new Blob(recordChunksRef.current, {
-          type: (recorder.mimeType || 'audio/webm').split(';')[0],
-        });
-        if (blob.size < 800) {
-          toast({
-            title: 'Vocal trop court',
-            description: 'Enregistrez un peu plus longtemps.',
-            variant: 'destructive',
-          });
-          return;
-        }
-        const baseType = (blob.type || 'audio/webm').split(';')[0] || 'audio/webm';
-        const ext = recordExtRef.current || 'webm';
-        const file = new File([blob], `vocal-${Date.now()}.${ext}`, {
-          type: baseType.startsWith('audio/') ? baseType : 'audio/webm',
-        });
-        addPendingFiles([file]);
+        const durationMs = recordDurationMsRef.current;
+        void (async () => {
+          if (!aliveRef.current) {
+            resolveFinalize(null);
+            return;
+          }
+          const result = await finalizeVoiceRecording(
+            recordChunksRef.current,
+            recorder.mimeType || 'audio/webm',
+            recordExtRef.current || 'webm',
+            durationMs
+          );
+          if (!result.ok) {
+            toast({
+              title: 'Vocal trop court',
+              description: 'Enregistrez au moins une seconde.',
+              variant: 'destructive',
+            });
+            resolveFinalize(null);
+            return;
+          }
+          addPendingFiles([result.file]);
+          resolveFinalize(result.file);
+        })();
       };
       mediaRecorderRef.current = recorder;
-      recorder.start(250);
+      // No timeslice: one complete cluster on stop → more reliable duration metadata
+      recorder.start();
       setRecording(true);
       setRecordSecs(0);
+      const startedAt = Date.now();
       recordTimerRef.current = window.setInterval(() => {
-        setRecordSecs(s => {
-          const next = s + 1;
-          if (next >= MAX_RECORD_SECS) {
-            queueMicrotask(() => stopVoice());
-            return MAX_RECORD_SECS;
-          }
-          return next;
-        });
-      }, 1000);
+        const elapsedMs = Date.now() - startedAt;
+        recordDurationMsRef.current = elapsedMs;
+        const secs = Math.floor(elapsedMs / 1000);
+        setRecordSecs(secs);
+        if (secs >= VOICE_MAX_RECORD_SECS) {
+          queueMicrotask(() => void stopVoice());
+        }
+      }, 250);
     } catch (err) {
       logger.error('Voice record failed', { error: err });
       toast({
@@ -425,7 +440,7 @@ export function ContactChatWidget() {
       });
       return;
     }
-    if (!content && pending.length === 0) {
+    if (!content && pending.length === 0 && !recording) {
       toast({
         title: 'Message vide',
         description: 'Écrivez un message ou ajoutez une photo / un vocal.',
@@ -433,7 +448,17 @@ export function ContactChatWidget() {
       });
       return;
     }
-    if (recording) stopVoice();
+    // Finalize vocal before send so pending includes the new file
+    if (recording) await stopVoice();
+    const mediaToSend = pendingRef.current;
+    if (!content && mediaToSend.length === 0) {
+      toast({
+        title: 'Message vide',
+        description: 'Écrivez un message ou ajoutez une photo / un vocal.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setSending(true);
     try {
@@ -441,7 +466,7 @@ export function ContactChatWidget() {
         userId: user.id,
         fullName: name,
         content,
-        media: pending,
+        media: mediaToSend,
       });
       setDraft('');
       setPending(prev => {
@@ -662,7 +687,7 @@ export function ContactChatWidget() {
                 <button
                   type="button"
                   disabled={sending || (!recording && pending.length >= MAX_PENDING)}
-                  onClick={() => (recording ? stopVoice() : void startVoice())}
+                  onClick={() => (recording ? void stopVoice() : void startVoice())}
                   className={cn(
                     'inline-flex items-center gap-1.5 h-8 px-2.5 rounded-full border text-xs font-medium transition-colors disabled:opacity-50',
                     recording

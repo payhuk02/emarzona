@@ -49,7 +49,7 @@ const EditGenericProductWizard = lazy(() =>
   }))
 );
 
-const EDITABLE_PRODUCT_FIELDS = 'id, product_type';
+const EDITABLE_PRODUCT_FIELDS = 'id, product_type, store_id';
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -202,9 +202,15 @@ const EditProduct = () => {
     navigate('/dashboard/products');
   };
 
+  // Always use the product's store_id for RPCs — context store can differ (multi-boutique).
+  const productStoreId =
+    typeof (product as { store_id?: string }).store_id === 'string'
+      ? (product as { store_id: string }).store_id
+      : store.id;
+
   const wizardProps = {
     productId: id,
-    storeId: store.id,
+    storeId: productStoreId,
     storeSlug: store.slug,
     onSuccess: handleSuccess,
     onBack: handleBack,

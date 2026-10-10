@@ -33,11 +33,11 @@ const DEFAULT_SUBTITLE_COLOR = '#0f0f12';
 const DEFAULT_CHIP_TEXT = '#0f0f12';
 const DEFAULT_ACCENT = '#f97316';
 const DEFAULT_TITLE_MIN = '1.85rem';
-const DEFAULT_TITLE_MAX = '6.5rem';
+const DEFAULT_TITLE_MAX = '7.75rem';
 const DEFAULT_SUBTITLE_MIN = '1rem';
 const DEFAULT_SUBTITLE_MAX = '2.35rem';
 const DEFAULT_CHIP_SIZE = '0.9375rem';
-const DEFAULT_TITLE_WEIGHT = '700';
+const DEFAULT_TITLE_WEIGHT = '800';
 const DEFAULT_SUBTITLE_WEIGHT = '700';
 
 /** Nombre seul → rem ; sinon valeur CSS telle quelle. */
@@ -243,23 +243,34 @@ export function PremiumPlatformHero() {
       <div className="lp-platform-hero__frame relative z-[2] mx-auto flex w-full max-w-[100rem] flex-col px-4 sm:px-6 md:px-10 lg:px-8 xl:px-12 2xl:px-14">
         <div className="lp-platform-hero__col-content relative z-[3] mx-auto flex w-full flex-col">
           <div className="lp-platform-hero__content">
-            <div
-              key={textKey}
-              className="lp-platform-hero__copy is-animating mx-auto w-full max-w-5xl text-center"
-            >
-              <h1 className="lp-platform-hero__title lp-serif">
-                <span className="lp-platform-hero__title-line">{current.titleLine1}</span>
-                <span className="lp-platform-hero__title-line">{current.titleLine2}</span>
-              </h1>
-              {current.subtitle.trim() ? (
-                <p className="lp-platform-hero__subtitle mx-auto mt-4 max-w-2xl leading-relaxed sm:mt-6 lg:mt-7 lg:max-w-4xl">
-                  {current.subtitle}
-                </p>
+            <div className="lp-platform-hero__center">
+              <div
+                key={textKey}
+                className="lp-platform-hero__copy is-animating mx-auto w-full max-w-5xl text-center"
+              >
+                <h1 className="lp-platform-hero__title lp-serif">
+                  <span className="lp-platform-hero__title-line">{current.titleLine1}</span>
+                  <span className="lp-platform-hero__title-line">{current.titleLine2}</span>
+                </h1>
+                {current.subtitle.trim() ? (
+                  <p className="lp-platform-hero__subtitle mx-auto mt-4 max-w-2xl leading-relaxed sm:mt-6 lg:mt-7 lg:max-w-4xl">
+                    {current.subtitle}
+                  </p>
+                ) : null}
+              </div>
+
+              {!reducedMotion && slideCount > 1 && !paused ? (
+                <div
+                  key={`progress-${active}`}
+                  className="lp-platform-hero__progress is-running mt-6 mx-auto"
+                  style={{ animationDuration: `${SLIDE_INTERVAL_MS}ms` }}
+                  aria-hidden
+                />
               ) : null}
             </div>
 
             <ul
-              className="lp-platform-hero__checks mt-5 flex w-fit max-w-full flex-col items-start gap-2 self-start sm:mt-8 lg:mt-10"
+              className="lp-platform-hero__checks flex w-fit max-w-full flex-col items-start gap-2"
               role="tablist"
               aria-label={t('platformHero.carouselNavLabel')}
             >
@@ -290,15 +301,6 @@ export function PremiumPlatformHero() {
                 );
               })}
             </ul>
-
-            {!reducedMotion && slideCount > 1 && !paused ? (
-              <div
-                key={`progress-${active}`}
-                className="lp-platform-hero__progress is-running mt-6 mx-auto"
-                style={{ animationDuration: `${SLIDE_INTERVAL_MS}ms` }}
-                aria-hidden
-              />
-            ) : null}
           </div>
         </div>
       </div>
