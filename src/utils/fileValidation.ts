@@ -278,7 +278,8 @@ function detectMimeTypeFromExtension(extension: string): string {
     '.ico': 'image/x-icon',
     // Vidéos
     '.mp4': 'video/mp4',
-    '.webm': 'video/webm',
+    // Prefer audio/webm — MediaRecorder voice notes use .webm; video/webm breaks <audio> playback
+    '.webm': 'audio/webm',
     '.mov': 'video/quicktime',
     '.avi': 'video/x-msvideo',
     // Audio

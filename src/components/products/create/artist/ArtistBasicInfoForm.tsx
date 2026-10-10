@@ -333,10 +333,10 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
               <button
                 type="button"
                 onClick={() => onUpdate({ artist_photo_url: undefined })}
-                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                className="absolute top-1 right-1 h-9 w-9 rounded-full bg-red-600 text-white shadow-md flex items-center justify-center z-10 touch-manipulation"
                 aria-label="Supprimer la photo de l'artiste"
               >
-                <X className="h-6 w-6 text-white" aria-hidden="true" />
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
             <div className="flex-1">
@@ -896,7 +896,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
               <button
                 type="button"
                 onClick={() => handleRemoveImage(index)}
-                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1.5 shadow-md touch-manipulation min-h-[36px] min-w-[36px] flex items-center justify-center z-10"
                 aria-label={`Supprimer l'image ${index + 1} de l'œuvre`}
               >
                 <X className="h-4 w-4" aria-hidden="true" />

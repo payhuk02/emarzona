@@ -353,7 +353,7 @@ export const PhysicalBasicInfoForm = ({
               />
               <button
                 onClick={() => handleRemoveImage(index)}
-                className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full shadow-md touch-manipulation min-h-[36px] min-w-[36px] flex items-center justify-center z-10"
                 aria-label={`Supprimer l'image ${index + 1}`}
               >
                 <X className="h-4 w-4" aria-hidden="true" />

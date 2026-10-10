@@ -1,7 +1,8 @@
 /**
  * Shared MediaRecorder helpers for contact chat (user + admin).
+ * Prefer WAV upload so HTML audio plays reliably in production (WebM/Opus + signed URLs often fail).
  */
-import { fixWebmDuration } from '@/lib/support/fix-webm-duration';
+import { convertAudioBlobToWav } from '@/lib/support/audio-wav';
 
 export const VOICE_MAX_RECORD_SECS = 120;
 export const VOICE_MIN_BYTES = 800;
@@ -27,33 +28,40 @@ export type VoiceFileResult =
   | { ok: false; reason: 'too_short' | 'empty' };
 
 /**
- * Assemble chunks into a playable voice File (WebM duration patched when needed).
- * durationMs should come from a ref updated during recording — not React state
- * (stop handlers often reset state to 0 before onstop runs).
+ * Assemble chunks into a playable voice File.
+ * Converts to WAV when possible so production <audio> + Supabase signed URLs always play.
  */
 export async function finalizeVoiceRecording(
   chunks: Blob[],
   mimeType: string,
-  ext: string,
+  _ext: string,
   durationMs: number
 ): Promise<VoiceFileResult> {
   const baseType = (mimeType || 'audio/webm').split(';')[0] || 'audio/webm';
-  let blob = new Blob(chunks, { type: baseType });
+  const rawBlob = new Blob(chunks, { type: baseType });
 
-  if (blob.size < VOICE_MIN_BYTES || durationMs < VOICE_MIN_MS) {
+  if (rawBlob.size < VOICE_MIN_BYTES || durationMs < VOICE_MIN_MS) {
     return { ok: false, reason: 'too_short' };
   }
 
-  if (baseType.includes('webm') || baseType.includes('matroska')) {
-    blob = await fixWebmDuration(blob, durationMs);
+  const wav = await convertAudioBlobToWav(rawBlob);
+  if (wav && wav.size >= VOICE_MIN_BYTES) {
+    const file = new File([wav], `vocal-${Date.now()}.wav`, { type: 'audio/wav' });
+    return { ok: true, file, durationMs };
   }
 
-  if (blob.size < VOICE_MIN_BYTES) {
+  // Fallback: keep original container (may not play everywhere)
+  if (rawBlob.size < VOICE_MIN_BYTES) {
     return { ok: false, reason: 'empty' };
   }
-
   const fileType = baseType.startsWith('audio/') ? baseType : 'audio/webm';
-  const file = new File([blob], `vocal-${Date.now()}.${ext || 'webm'}`, { type: fileType });
+  const ext =
+    fileType.includes('mp4') || fileType.includes('m4a')
+      ? 'm4a'
+      : fileType.includes('ogg')
+        ? 'ogg'
+        : 'webm';
+  const file = new File([rawBlob], `vocal-${Date.now()}.${ext}`, { type: fileType });
   return { ok: true, file, durationMs };
 }
 
@@ -67,7 +75,6 @@ export function stopMediaRecorderAndWait(recorder: MediaRecorder | null): Promis
     const done = () => resolve();
     recorder.addEventListener('stop', done, { once: true });
     try {
-      // Flush the final cluster before stop (helps some Chromium builds)
       if (recorder.state === 'recording') {
         try {
           recorder.requestData();
@@ -79,7 +86,6 @@ export function stopMediaRecorderAndWait(recorder: MediaRecorder | null): Promis
     } catch {
       resolve();
     }
-    // Safety timeout if stop never fires
     window.setTimeout(done, 2000);
   });
 }

@@ -583,7 +583,7 @@ export const DigitalBasicInfoForm = ({
                   type="button"
                   variant="destructive"
                   size="icon"
-                  className="absolute top-1 right-1 h-11 w-11 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation min-h-[44px] min-w-[44px]"
+                  className="absolute top-1 right-1 h-9 w-9 sm:h-10 sm:w-10 rounded-full shadow-md touch-manipulation min-h-[36px] min-w-[36px] z-10"
                   onClick={() => {
                     const currentImages = formData.images || [];
                     const newImages = currentImages.filter((_: string, i: number) => i !== index);
@@ -618,7 +618,7 @@ export const DigitalBasicInfoForm = ({
                     type="button"
                     variant="destructive"
                     size="icon"
-                    className="absolute top-1 right-1 h-11 w-11 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation min-h-[44px] min-w-[44px]"
+                    className="absolute top-1 right-1 h-9 w-9 sm:h-10 sm:w-10 rounded-full shadow-md touch-manipulation min-h-[36px] min-w-[36px] z-10"
                     onClick={() => {
                       updateFormData({ image_url: '' });
                     }}
