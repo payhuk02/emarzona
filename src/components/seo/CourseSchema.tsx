@@ -51,52 +51,53 @@ export const CourseSchema = ({
   useEffect(() => {
     // Créer le script JSON-LD
     const schema = {
-      "@context": "https://schema.org",
-      "@type": "Course",
-      "name": courseName,
-      "description": description,
-      "isFamilyFriendly": true,
-      "provider": {
-        "@type": "Organization",
-        "name": provider.name,
-        ...(provider.url && { "url": provider.url }),
+      '@context': 'https://schema.org',
+      '@type': 'Course',
+      name: courseName,
+      description: description,
+      isFamilyFriendly: true,
+      provider: {
+        '@type': 'Organization',
+        name: provider.name,
+        ...(provider.url && { url: provider.url }),
       },
       ...(instructor && {
-        "instructor": {
-          "@type": "Person",
-          "name": instructor.name,
-          ...(instructor.url && { "url": instructor.url }),
+        instructor: {
+          '@type': 'Person',
+          name: instructor.name,
+          ...(instructor.url && { url: instructor.url }),
         },
       }),
       ...(price !== undefined && {
-        "offers": {
-          "@type": "Offer",
-          "price": price,
-          "priceCurrency": currency,
-          "availability": "https://schema.org/InStock",
-          ...(url && { "url": url }),
+        offers: {
+          '@type': 'Offer',
+          price: price,
+          priceCurrency: currency,
+          availability: 'https://schema.org/InStock',
+          ...(url && { url: url }),
         },
       }),
-      ...(category && { "coursePrerequisites": category }),
-      ...(level && { "educationalLevel": level }),
-      "inLanguage": language,
-      ...(totalLessons && { "numberOfLessons": totalLessons }),
-      ...(duration && { "timeRequired": duration }),
-      ...(rating && rating.count > 0 && {
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": rating.value,
-          "reviewCount": rating.count,
-          "bestRating": "5",
-          "worstRating": "1",
-        },
-      }),
-      ...(image && { "image": image }),
-      ...(url && { "url": url }),
-      "hasCourseInstance": {
-        "@type": "CourseInstance",
-        "courseMode": "online",
-        "courseWorkload": duration || "PT1H",
+      ...(category && { coursePrerequisites: category }),
+      ...(level && { educationalLevel: level }),
+      inLanguage: language,
+      ...(totalLessons && { numberOfLessons: totalLessons }),
+      ...(duration && { timeRequired: duration }),
+      ...(rating &&
+        rating.count > 0 && {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: rating.value,
+            reviewCount: rating.count,
+            bestRating: '5',
+            worstRating: '1',
+          },
+        }),
+      ...(image && { image: image }),
+      ...(url && { url: url }),
+      hasCourseInstance: {
+        '@type': 'CourseInstance',
+        courseMode: 'online',
+        courseWorkload: duration || 'PT1H',
       },
     };
 
@@ -145,20 +146,14 @@ export const CourseSchema = ({
  * Helper pour convertir des minutes en format ISO 8601
  * Ex: 90 minutes -> "PT1H30M"
  */
-export const minutesToISO8601 = (minutes: number): string => {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  
-  let  result= 'PT';
+export const minutesToISO8601 = (minutes: number | null | undefined): string => {
+  const safe = typeof minutes === 'number' && Number.isFinite(minutes) ? Math.max(0, minutes) : 0;
+  const hours = Math.floor(safe / 60);
+  const mins = safe % 60;
+
+  let result = 'PT';
   if (hours > 0) result += `${hours}H`;
   if (mins > 0) result += `${mins}M`;
-  
-  return result || 'PT0M';
+
+  return result === 'PT' ? 'PT0M' : result;
 };
-
-
-
-
-
-
-

@@ -1,19 +1,66 @@
 /**
  * Renders platform contact message attachments (image / audio / file).
- * Audio: fetch signed URL as Blob + object URL so playback works when Storage
- * Content-Type / Range headers break native <audio src={signedUrl}>.
+ * Audio: authenticated Storage download → Blob/object URL (signed URL fetch often
+ * fails on mobile due to CORS / Content-Type / Range). Re-encode to WAV when needed.
  */
 import { useEffect, useState } from 'react';
 import { FileIcon, ImageOff, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { ATTACHMENTS_BUCKET } from '@/lib/attachments/storage-ref';
+import { convertAudioBlobToWav } from '@/lib/support/audio-wav';
 import type { PlatformContactAttachment } from '@/lib/support/platform-contact';
 import { cn } from '@/lib/utils';
 
+function guessAudioMime(fileName: string, fileType?: string): string {
+  const fromType = fileType?.startsWith('audio/') ? fileType.split(';')[0] : null;
+  if (fromType) return fromType;
+  const lower = fileName.toLowerCase();
+  if (lower.endsWith('.wav')) return 'audio/wav';
+  if (lower.endsWith('.m4a') || lower.endsWith('.mp4')) return 'audio/mp4';
+  if (lower.endsWith('.ogg')) return 'audio/ogg';
+  if (lower.endsWith('.mp3')) return 'audio/mpeg';
+  return 'audio/webm';
+}
+
+async function loadAudioBlob(
+  storagePath: string,
+  signedUrl: string | null | undefined,
+  fileName: string,
+  fileType?: string
+): Promise<Blob> {
+  const mime = guessAudioMime(fileName, fileType);
+
+  // 1) Authenticated download (best: session + RLS, no CORS on raw GET)
+  const { data, error } = await supabase.storage.from(ATTACHMENTS_BUCKET).download(storagePath);
+  if (!error && data && data.size > 0) {
+    return data.type && data.type.startsWith('audio/')
+      ? data
+      : new Blob([await data.arrayBuffer()], { type: mime });
+  }
+
+  // 2) Signed URL fetch fallback
+  if (signedUrl) {
+    const res = await fetch(signedUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const buf = await res.arrayBuffer();
+    if (!buf.byteLength) throw new Error('empty audio');
+    const headerMime = res.headers.get('content-type')?.split(';')[0];
+    return new Blob([buf], {
+      type: headerMime?.startsWith('audio/') ? headerMime : mime,
+    });
+  }
+
+  throw error ?? new Error('audio download failed');
+}
+
 function ContactAudioPlayer({
+  storagePath,
   signedUrl,
   fileName,
   fileType,
 }: {
-  signedUrl: string;
+  storagePath: string;
+  signedUrl?: string | null;
   fileName: string;
   fileType?: string;
 }) {
@@ -28,33 +75,30 @@ function ContactAudioPlayer({
       setFailed(false);
       setObjectUrl(null);
       try {
-        const res = await fetch(signedUrl);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const buf = await res.arrayBuffer();
+        const raw = await loadAudioBlob(storagePath, signedUrl, fileName, fileType);
         if (cancelled) return;
-        const mime =
-          (fileType && fileType.startsWith('audio/') ? fileType.split(';')[0] : null) ||
-          res.headers.get('content-type')?.split(';')[0] ||
-          (fileName.toLowerCase().endsWith('.wav')
-            ? 'audio/wav'
-            : fileName.toLowerCase().endsWith('.m4a')
-              ? 'audio/mp4'
-              : fileName.toLowerCase().endsWith('.ogg')
-                ? 'audio/ogg'
-                : 'audio/webm');
-        const blob = new Blob([buf], { type: mime });
-        const url = URL.createObjectURL(blob);
-        revoked = url;
-        if (cancelled) {
-          URL.revokeObjectURL(url);
-          return;
+
+        // Prefer universal WAV for <audio> (esp. iOS + older WebM notes)
+        let playable: Blob = raw;
+        const alreadyWav = raw.type.includes('wav') || fileName.toLowerCase().endsWith('.wav');
+        if (!alreadyWav) {
+          const wav = await convertAudioBlobToWav(raw);
+          if (wav && wav.size > 44) playable = wav;
+        } else if (!raw.type || raw.type === 'application/octet-stream') {
+          playable = new Blob([await raw.arrayBuffer()], { type: 'audio/wav' });
         }
+
+        if (cancelled) return;
+        const url = URL.createObjectURL(playable);
+        revoked = url;
         setObjectUrl(url);
       } catch {
         if (!cancelled) {
-          // Last resort: direct signed URL
-          setObjectUrl(signedUrl);
-          setFailed(false);
+          if (signedUrl) {
+            setObjectUrl(signedUrl);
+          } else {
+            setFailed(true);
+          }
         }
       }
     };
@@ -64,7 +108,13 @@ function ContactAudioPlayer({
       cancelled = true;
       if (revoked) URL.revokeObjectURL(revoked);
     };
-  }, [signedUrl, fileName, fileType]);
+  }, [storagePath, signedUrl, fileName, fileType]);
+
+  if (failed && !objectUrl) {
+    return (
+      <p className="text-[10px] text-destructive px-1 py-1">Lecture impossible · {fileName}</p>
+    );
+  }
 
   if (!objectUrl) {
     return (
@@ -81,6 +131,7 @@ function ContactAudioPlayer({
         key={objectUrl}
         controls
         preload="auto"
+        playsInline
         controlsList="nodownload"
         className="w-full max-w-full h-9"
         src={objectUrl}
@@ -138,7 +189,7 @@ export function ContactChatMedia({
         }
 
         if (att.kind === 'audio') {
-          if (!att.signedUrl) {
+          if (!att.storage_path && !att.signedUrl) {
             return (
               <div
                 key={att.id}
@@ -151,6 +202,7 @@ export function ContactChatMedia({
           return (
             <div key={att.id} className="rounded-xl border bg-background/50 px-2 py-2 max-w-full">
               <ContactAudioPlayer
+                storagePath={att.storage_path}
                 signedUrl={att.signedUrl}
                 fileName={att.file_name}
                 fileType={att.file_type}

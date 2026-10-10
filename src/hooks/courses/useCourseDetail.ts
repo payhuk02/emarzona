@@ -5,9 +5,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 const PRODUCT_FIELDS =
-  'id, store_id, slug, name, description, product_type, is_active, free_product_id, paid_product_id, image_url, price, currency, created_at, updated_at';
+  'id, store_id, slug, name, description, short_description, product_type, is_active, free_product_id, paid_product_id, image_url, price, promotional_price, currency, category, faqs, licensing_type, license_terms, created_at, updated_at';
 const COURSE_FIELDS =
   'id, product_id, level, language, certificate_enabled, learning_objectives, prerequisites, target_audience, total_lessons, total_duration_minutes, total_enrollments, average_rating, created_at, updated_at';
 const COURSE_SECTION_FIELDS =
@@ -28,30 +29,30 @@ export const useCourseDetail = (slug: string) => {
         .eq('is_active', true)
         .single();
 
+      if (productError || !product) {
+        throw new Error(`Cours non trouvé: ${productError?.message || 'introuvable'}`);
+      }
+
       // Récupérer les produits preview/paid si ils existent
       let freeProduct = null;
       let paidProduct = null;
 
-      if (product?.free_product_id) {
+      if (product.free_product_id) {
         const { data: freeData } = await supabase
           .from('products')
           .select(PRODUCT_FIELDS)
           .eq('id', product.free_product_id)
-          .single();
+          .maybeSingle();
         freeProduct = freeData;
       }
 
-      if (product?.paid_product_id) {
+      if (product.paid_product_id) {
         const { data: paidData } = await supabase
           .from('products')
           .select(PRODUCT_FIELDS)
           .eq('id', product.paid_product_id)
-          .single();
+          .maybeSingle();
         paidProduct = paidData;
-      }
-
-      if (productError) {
-        throw new Error(`Cours non trouvé: ${productError.message}`);
       }
 
       // 2. Récupérer les détails du cours
@@ -61,8 +62,8 @@ export const useCourseDetail = (slug: string) => {
         .eq('product_id', product.id)
         .single();
 
-      if (courseError) {
-        throw new Error(`Détails du cours non trouvés: ${courseError.message}`);
+      if (courseError || !course) {
+        throw new Error(`Cours non trouvé: ${courseError?.message || 'détails manquants'}`);
       }
 
       // 3–6. Parallelize sections / lessons / store / enrollment to avoid serial timeouts.
@@ -97,11 +98,24 @@ export const useCourseDetail = (slug: string) => {
           : Promise.resolve({ data: null, error: null }),
       ]);
 
+      // Soft-fail curriculum: unpaid buyers may hit lesson RLS; page must still render h1 + CTA
       if (sectionsResult.error) {
-        throw new Error(`Erreur sections: ${sectionsResult.error.message}`);
+        logger.warn('course sections query failed', {
+          error: sectionsResult.error.message,
+          courseId: course.id,
+        });
       }
       if (lessonsResult.error) {
-        throw new Error(`Erreur leçons: ${lessonsResult.error.message}`);
+        logger.warn('course lessons query failed', {
+          error: lessonsResult.error.message,
+          courseId: course.id,
+        });
+      }
+      if (enrollmentResult.error) {
+        logger.warn('course enrollment query failed', {
+          error: enrollmentResult.error.message,
+          courseId: course.id,
+        });
       }
 
       const sections = sectionsResult.data ?? [];
@@ -118,7 +132,7 @@ export const useCourseDetail = (slug: string) => {
       let lastViewedLesson = null;
 
       const enrollmentData = enrollmentResult.data;
-      if (enrollmentData) {
+      if (enrollmentData && user) {
         isEnrolled = true;
         enrollment = enrollmentData;
 
@@ -126,7 +140,7 @@ export const useCourseDetail = (slug: string) => {
           .from('course_lesson_progress')
           .select('lesson_id, updated_at, is_completed')
           .eq('enrollment_id', enrollmentData.id)
-          .eq('user_id', user!.id)
+          .eq('user_id', user.id)
           .order('updated_at', { ascending: false })
           .limit(1)
           .maybeSingle();

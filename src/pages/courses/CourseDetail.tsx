@@ -361,7 +361,7 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
           duration={minutesToISO8601(course.total_duration_minutes)}
           rating={{
             value: course.average_rating || 0,
-            count: course.total_reviews || 0,
+            count: 0,
           }}
           image={product.image_url || ''}
           url={`https://emarzona.vercel.app/courses/${product.slug}`}

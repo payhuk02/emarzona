@@ -168,6 +168,42 @@ export async function seedPaidCourseFixture(
 
   if (courseError || !course) throw courseError ?? new Error('course insert failed');
 
+  // Preview curriculum so unpaid buyers can load course detail (lesson RLS + UI).
+  const { data: section, error: sectionError } = await retryOnTransientPostgrest(() =>
+    admin
+      .from('course_sections')
+      .insert({
+        course_id: course.id,
+        title: 'Introduction',
+        description: 'Section E2E',
+        order_index: 0,
+      })
+      .select('id')
+      .single()
+  );
+  if (sectionError || !section) throw sectionError ?? new Error('course_sections insert failed');
+
+  const { error: lessonError } = await retryOnTransientPostgrest(() =>
+    admin.from('course_lessons').insert({
+      course_id: course.id,
+      section_id: section.id,
+      title: 'Leçon aperçu E2E',
+      description: 'Preview lesson',
+      video_type: 'youtube',
+      video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      order_index: 0,
+      is_preview: true,
+    })
+  );
+  if (lessonError) throw lessonError;
+
+  await retryOnTransientPostgrest(() =>
+    admin
+      .from('courses')
+      .update({ total_lessons: 1, total_duration_minutes: 5 })
+      .eq('id', course.id)
+  );
+
   const customerId = await createCustomer(admin, store.id, buyer);
   const orderNumber = resolveOrderNumber(runId);
 

@@ -103,7 +103,9 @@ export function ContactChatWidget() {
   const nameTouchedRef = useRef(false);
   const composerBlurTimerRef = useRef<number | null>(null);
   const pendingRef = useRef(pending);
-  pendingRef.current = pending;
+  useEffect(() => {
+    pendingRef.current = pending;
+  }, [pending]);
 
   const onComposerFocus = useCallback(() => {
     if (composerBlurTimerRef.current) {
@@ -391,8 +393,12 @@ export function ContactChatWidget() {
           );
           if (!result.ok) {
             toast({
-              title: 'Vocal trop court',
-              description: 'Enregistrez au moins une seconde.',
+              title:
+                result.reason === 'encode_failed' ? 'Vocal non convertible' : 'Vocal trop court',
+              description:
+                result.reason === 'encode_failed'
+                  ? 'Réessayez le vocal (format non supporté sur cet appareil).'
+                  : 'Enregistrez au moins une seconde.',
               variant: 'destructive',
             });
             resolveFinalize(null);
@@ -449,8 +455,17 @@ export function ContactChatWidget() {
       return;
     }
     // Finalize vocal before send so pending includes the new file
-    if (recording) await stopVoice();
-    const mediaToSend = pendingRef.current;
+    let justRecorded: File | null = null;
+    if (recording) justRecorded = await stopVoice();
+    let mediaToSend = pendingRef.current;
+    // Guard race: render may reset pendingRef before setState commits the new file
+    if (
+      justRecorded &&
+      !mediaToSend.some(m => m.file === justRecorded || m.file.name === justRecorded.name)
+    ) {
+      mediaToSend = [...mediaToSend, makePending(justRecorded)];
+      pendingRef.current = mediaToSend;
+    }
     if (!content && mediaToSend.length === 0) {
       toast({
         title: 'Message vide',

@@ -47,21 +47,27 @@ export function audioBufferToWav(buffer: AudioBuffer): Blob {
   return new Blob([arrayBuffer], { type: 'audio/wav' });
 }
 
+function getAudioContextCtor(): typeof AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  const w = window as unknown as {
+    AudioContext?: typeof AudioContext;
+    webkitAudioContext?: typeof AudioContext;
+  };
+  return w.AudioContext || w.webkitAudioContext || null;
+}
+
 /** Decode any supported audio Blob and re-encode as WAV. Returns null if decode fails. */
 export async function convertAudioBlobToWav(blob: Blob): Promise<Blob | null> {
-  if (
-    typeof AudioContext === 'undefined' &&
-    typeof (window as unknown as { webkitAudioContext?: unknown }).webkitAudioContext ===
-      'undefined'
-  ) {
-    return null;
-  }
-  const AC =
-    window.AudioContext ||
-    (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+  const AC = getAudioContextCtor();
+  if (!AC || blob.size < 100) return null;
+
   const ctx = new AC();
   try {
+    if (ctx.state === 'suspended') {
+      await ctx.resume().catch(() => undefined);
+    }
     const raw = await blob.arrayBuffer();
+    // copy: decodeAudioData detaches/transfers the buffer in some browsers
     const decoded = await ctx.decodeAudioData(raw.slice(0));
     if (!decoded.duration || decoded.duration < 0.05 || decoded.length < 100) {
       return null;

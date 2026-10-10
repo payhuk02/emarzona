@@ -217,8 +217,12 @@ export function ContactChatMediaControls({
           );
           if (!result.ok) {
             toast({
-              title: 'Vocal trop court',
-              description: 'Enregistrez au moins une seconde.',
+              title:
+                result.reason === 'encode_failed' ? 'Vocal non convertible' : 'Vocal trop court',
+              description:
+                result.reason === 'encode_failed'
+                  ? 'Réessayez le vocal (format non supporté sur cet appareil).'
+                  : 'Enregistrez au moins une seconde.',
               variant: 'destructive',
             });
             resolveFinalize(null);

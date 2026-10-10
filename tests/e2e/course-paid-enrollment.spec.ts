@@ -108,10 +108,12 @@ test.describe('Course paid enrollment (E2E)', () => {
       await loginAsSeededUser(page, admin, unpaidBuyer.email, '/dashboard', unpaidBuyer.password);
       await gotoApp(page, `/courses/${fixture.product.slug}`);
 
-      await expect(page.getByText(/Cours non trouvé/i)).toHaveCount(0, { timeout: 5_000 });
-      await expect(page.getByRole('heading', { level: 1 })).toContainText(fixture.product.name, {
-        timeout: 45_000,
-      });
+      // Wait for detail success (h1) — do not assert "Cours non trouvé" during skeleton load
+      // (that text is absent while loading, which previously raced a false green).
+      const title = page
+        .getByRole('heading', { level: 1 })
+        .filter({ hasText: fixture.product.name });
+      await expect(title).toBeVisible({ timeout: 60_000 });
 
       const enrollButton = page.getByTestId('course-enroll-cta');
       await expect(enrollButton).toBeVisible({ timeout: 15_000 });

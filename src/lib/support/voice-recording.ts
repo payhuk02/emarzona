@@ -25,11 +25,11 @@ export function pickRecorderMime(): { mimeType?: string; ext: string } {
 
 export type VoiceFileResult =
   | { ok: true; file: File; durationMs: number }
-  | { ok: false; reason: 'too_short' | 'empty' };
+  | { ok: false; reason: 'too_short' | 'empty' | 'encode_failed' };
 
 /**
  * Assemble chunks into a playable voice File.
- * Converts to WAV when possible so production <audio> + Supabase signed URLs always play.
+ * Converts to WAV when possible so production <audio> always plays (incl. iOS).
  */
 export async function finalizeVoiceRecording(
   chunks: Blob[],
@@ -44,25 +44,31 @@ export async function finalizeVoiceRecording(
     return { ok: false, reason: 'too_short' };
   }
 
-  const wav = await convertAudioBlobToWav(rawBlob);
+  // Retry WAV encode once — first attempt can fail if AudioContext was suspended.
+  let wav = await convertAudioBlobToWav(rawBlob);
+  if (!wav || wav.size < VOICE_MIN_BYTES) {
+    await new Promise(r => setTimeout(r, 50));
+    wav = await convertAudioBlobToWav(rawBlob);
+  }
+
   if (wav && wav.size >= VOICE_MIN_BYTES) {
     const file = new File([wav], `vocal-${Date.now()}.wav`, { type: 'audio/wav' });
     return { ok: true, file, durationMs };
   }
 
-  // Fallback: keep original container (may not play everywhere)
+  // Last resort: keep original container (may not play on iOS). Prefer failing empty over silence.
   if (rawBlob.size < VOICE_MIN_BYTES) {
     return { ok: false, reason: 'empty' };
   }
-  const fileType = baseType.startsWith('audio/') ? baseType : 'audio/webm';
-  const ext =
-    fileType.includes('mp4') || fileType.includes('m4a')
-      ? 'm4a'
-      : fileType.includes('ogg')
-        ? 'ogg'
-        : 'webm';
-  const file = new File([rawBlob], `vocal-${Date.now()}.${ext}`, { type: fileType });
-  return { ok: true, file, durationMs };
+
+  // audio/mp4 (Safari MediaRecorder) is widely playable — allow as fallback.
+  if (baseType.includes('mp4') || baseType.includes('m4a') || baseType.includes('aac')) {
+    const file = new File([rawBlob], `vocal-${Date.now()}.m4a`, { type: 'audio/mp4' });
+    return { ok: true, file, durationMs };
+  }
+
+  // WebM/Ogg often unplayable in production players — surface encode failure so UI can toast.
+  return { ok: false, reason: 'encode_failed' };
 }
 
 /** Stop recorder and wait for onstop (so the blob is ready before send). */
