@@ -15,6 +15,7 @@ import { ADMIN_NAV_SECTIONS, filterAdminNavSections } from '@/lib/admin/admin-na
 import { prefetchRouteChunk } from '@/lib/route-chunk-prefetch';
 import { Menu, X } from 'lucide-react';
 import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
+import { useAdminContactUnreadCount } from '@/hooks/useAdminContactUnreadCount';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -31,6 +32,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { isAAL2 } = useAdminMFA();
   const { can, isSuperAdmin, platformRole, loading: permLoading } = useCurrentAdminPermissions();
   const showMfaStatus = !isPrincipalAdminEmail(user?.email);
+  const { count: contactUnread } = useAdminContactUnreadCount(!permLoading);
 
   const menuSections = useMemo(() => {
     if (permLoading) return [];
@@ -127,6 +129,8 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                   {section.items.map(item => {
                     const Icon = item.icon;
                     const isActive = location.pathname === item.path;
+                    const showContactBadge =
+                      item.path === '/admin/contact-messages' && contactUnread > 0;
                     return (
                       <Button
                         key={item.path}
@@ -137,12 +141,22 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                         <NavLink
                           to={item.path}
                           end={item.path === '/admin'}
-                          aria-label={item.label}
+                          aria-label={
+                            showContactBadge
+                              ? `${item.label} (${contactUnread} non lus)`
+                              : item.label
+                          }
                           onClick={() => setMobileMenuOpen(false)}
                           onMouseEnter={() => prefetchRouteChunk(item.path)}
+                          className="flex w-full items-center gap-3"
                         >
-                          <Icon className="h-5 w-5" aria-hidden="true" />
-                          <span>{item.label}</span>
+                          <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                          <span className="flex-1 text-left">{item.label}</span>
+                          {showContactBadge && (
+                            <Badge className="bg-emerald-500 hover:bg-emerald-500 text-white shrink-0 min-w-[1.25rem] justify-center px-1.5">
+                              {contactUnread > 99 ? '99+' : contactUnread}
+                            </Badge>
+                          )}
                         </NavLink>
                       </Button>
                     );
@@ -218,6 +232,8 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                   {section.items.map(item => {
                     const Icon = item.icon;
                     const isActive = location.pathname === item.path;
+                    const showContactBadge =
+                      item.path === '/admin/contact-messages' && contactUnread > 0;
 
                     return (
                       <Button
@@ -225,18 +241,42 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                         asChild
                         variant={isActive ? 'default' : 'ghost'}
                         className={cn(
-                          'w-full justify-start gap-3 min-h-11',
+                          'w-full justify-start gap-3 min-h-11 relative',
                           !sidebarOpen && 'justify-center'
                         )}
                       >
                         <NavLink
                           to={item.path}
                           end={item.path === '/admin'}
-                          aria-label={item.label}
+                          aria-label={
+                            showContactBadge
+                              ? `${item.label} (${contactUnread} non lus)`
+                              : item.label
+                          }
                           onMouseEnter={() => prefetchRouteChunk(item.path)}
+                          className={cn(
+                            'flex w-full items-center gap-3',
+                            !sidebarOpen && 'justify-center'
+                          )}
                         >
-                          <Icon className="h-5 w-5" aria-hidden="true" />
-                          {sidebarOpen && <span>{item.label}</span>}
+                          <span className="relative shrink-0">
+                            <Icon className="h-5 w-5" aria-hidden="true" />
+                            {!sidebarOpen && showContactBadge && (
+                              <span className="absolute -top-1.5 -right-1.5 min-w-[1rem] h-4 px-0.5 rounded-full bg-emerald-500 text-[10px] font-bold text-white flex items-center justify-center">
+                                {contactUnread > 9 ? '9+' : contactUnread}
+                              </span>
+                            )}
+                          </span>
+                          {sidebarOpen && (
+                            <>
+                              <span className="flex-1 text-left truncate">{item.label}</span>
+                              {showContactBadge && (
+                                <Badge className="bg-emerald-500 hover:bg-emerald-500 text-white shrink-0 min-w-[1.25rem] justify-center px-1.5">
+                                  {contactUnread > 99 ? '99+' : contactUnread}
+                                </Badge>
+                              )}
+                            </>
+                          )}
                         </NavLink>
                       </Button>
                     );

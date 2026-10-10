@@ -1,7 +1,7 @@
 /**
- * Admin — messages contact plateforme (répondre aux utilisateurs).
+ * Admin — messages contact plateforme (répondre texte + galerie / photo / vocal).
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,10 +20,16 @@ import {
   fetchContactMessages,
   markAdminThreadRead,
   sendAdminContactReply,
+  type PendingContactMedia,
   type PlatformContactMessage,
   type PlatformContactThread,
 } from '@/lib/support/platform-contact';
 import { ContactChatMedia } from '@/components/support/ContactChatMedia';
+import {
+  ContactChatMediaControls,
+  revokeContactPending,
+} from '@/components/support/ContactChatMediaControls';
+import { notifyAdminContactUnreadChanged } from '@/hooks/useAdminContactUnreadCount';
 
 export default function AdminContactMessages() {
   const { user } = useAuth();
@@ -34,29 +40,47 @@ export default function AdminContactMessages() {
   const [loading, setLoading] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [reply, setReply] = useState('');
+  const [pending, setPending] = useState<PendingContactMedia[]>([]);
   const [sending, setSending] = useState(false);
   const [search, setSearch] = useState('');
 
-  const loadThreads = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await fetchAdminContactThreads();
-      setThreads(data);
-    } catch (err) {
-      logger.error('Admin contact threads load failed', { error: err });
-      toast({
-        title: 'Erreur',
-        description: 'Impossible de charger les messages.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
+  const totalUnread = useMemo(
+    () => threads.reduce((acc, t) => acc + (t.admin_unread_count || 0), 0),
+    [threads]
+  );
+
+  const loadThreads = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!opts?.silent) setLoading(true);
+      try {
+        const data = await fetchAdminContactThreads();
+        setThreads(data);
+      } catch (err) {
+        logger.error('Admin contact threads load failed', { error: err });
+        if (!opts?.silent) {
+          toast({
+            title: 'Erreur',
+            description: 'Impossible de charger les messages.',
+            variant: 'destructive',
+          });
+        }
+      } finally {
+        if (!opts?.silent) setLoading(false);
+      }
+    },
+    [toast]
+  );
 
   useEffect(() => {
     void loadThreads();
+    const id = window.setInterval(() => void loadThreads({ silent: true }), 30_000);
+    return () => window.clearInterval(id);
   }, [loadThreads]);
+
+  useEffect(() => {
+    return () => revokeContactPending(pending);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- unmount only
+  }, []);
 
   const selected = threads.find(t => t.id === selectedId) ?? null;
 
@@ -70,6 +94,7 @@ export default function AdminContactMessages() {
         setThreads(prev =>
           prev.map(t => (t.id === threadId ? { ...t, admin_unread_count: 0 } : t))
         );
+        notifyAdminContactUnreadChanged();
       } catch (err) {
         logger.error('Admin contact messages load failed', { error: err });
         toast({
@@ -88,23 +113,35 @@ export default function AdminContactMessages() {
     if (selectedId) {
       void loadMessages(selectedId);
       setReply('');
+      setPending(prev => {
+        revokeContactPending(prev);
+        return [];
+      });
     } else {
       setMessages([]);
     }
   }, [selectedId, loadMessages]);
 
+  const canSend = Boolean(selected && user && (reply.trim() || pending.length > 0) && !sending);
+
   const handleReply = async () => {
-    if (!user || !selectedId || !reply.trim()) return;
+    if (!user || !selectedId || !selected || !canSend) return;
     setSending(true);
     try {
       await sendAdminContactReply({
         threadId: selectedId,
+        threadUserId: selected.user_id,
         adminUserId: user.id,
         content: reply.trim(),
+        media: pending,
       });
       setReply('');
+      setPending(prev => {
+        revokeContactPending(prev);
+        return [];
+      });
       await loadMessages(selectedId);
-      await loadThreads();
+      await loadThreads({ silent: true });
       toast({ title: 'Réponse envoyée' });
     } catch (err) {
       logger.error('Admin reply failed', { error: err });
@@ -134,9 +171,14 @@ export default function AdminContactMessages() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <MessageSquare className="h-6 w-6" />
             Messages contact
+            {totalUnread > 0 && (
+              <Badge className="bg-emerald-500 hover:bg-emerald-500 text-white ml-1">
+                {totalUnread > 99 ? '99+' : totalUnread}
+              </Badge>
+            )}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Messages des utilisateurs via le bouton chat — répondez ici.
+            Messages des utilisateurs via le bouton chat — répondez ici (texte, photo, vocal).
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={() => void loadThreads()}>
@@ -153,7 +195,14 @@ export default function AdminContactMessages() {
           )}
         >
           <CardHeader className="pb-3 space-y-3">
-            <CardTitle className="text-base">Conversations</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2">
+              Conversations
+              {totalUnread > 0 && (
+                <Badge variant="secondary" className="font-normal">
+                  {totalUnread} non lu{totalUnread > 1 ? 's' : ''}
+                </Badge>
+              )}
+            </CardTitle>
             <Input
               placeholder="Rechercher un nom…"
               value={search}
@@ -199,8 +248,8 @@ export default function AdminContactMessages() {
                             )}
                           </div>
                           {t.admin_unread_count > 0 && (
-                            <Badge className="bg-emerald-500 hover:bg-emerald-500 shrink-0">
-                              {t.admin_unread_count}
+                            <Badge className="bg-emerald-500 hover:bg-emerald-500 shrink-0 min-w-[1.5rem] justify-center">
+                              {t.admin_unread_count > 99 ? '99+' : t.admin_unread_count}
                             </Badge>
                           )}
                         </div>
@@ -250,7 +299,7 @@ export default function AdminContactMessages() {
               </p>
             ) : (
               <>
-                <ScrollArea className="flex-1 min-h-[12rem] max-h-[min(50vh,28rem)] rounded-lg border p-3">
+                <ScrollArea className="flex-1 min-h-[12rem] max-h-[min(45vh,26rem)] rounded-lg border p-3">
                   {loadingMessages ? (
                     <div className="flex justify-center py-8">
                       <Loader2 className="h-5 w-5 animate-spin" />
@@ -259,6 +308,7 @@ export default function AdminContactMessages() {
                     <div className="space-y-3">
                       {messages.map(msg => {
                         const isAdmin = msg.sender_type === 'admin';
+                        const hasText = Boolean(msg.content?.trim());
                         return (
                           <div
                             key={msg.id}
@@ -275,10 +325,13 @@ export default function AdminContactMessages() {
                                   : 'bg-muted text-foreground'
                               )}
                             >
-                              {msg.content?.trim() ? (
+                              {hasText ? (
                                 <p className="whitespace-pre-wrap">{msg.content}</p>
                               ) : null}
-                              <ContactChatMedia attachments={msg.attachments ?? []} />
+                              <ContactChatMedia
+                                attachments={msg.attachments ?? []}
+                                className={cn(hasText && 'mt-2')}
+                              />
                             </div>
                             <span className="text-[10px] text-muted-foreground px-1">
                               {isAdmin ? 'Vous (admin)' : selected.full_name} ·{' '}
@@ -296,12 +349,7 @@ export default function AdminContactMessages() {
                     value={reply}
                     onChange={e => setReply(e.target.value)}
                     onKeyDown={e => {
-                      if (
-                        e.key === 'Enter' &&
-                        (e.ctrlKey || e.metaKey) &&
-                        reply.trim() &&
-                        !sending
-                      ) {
+                      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && canSend) {
                         e.preventDefault();
                         void handleReply();
                       }
@@ -312,10 +360,15 @@ export default function AdminContactMessages() {
                     disabled={sending}
                     className="resize-none"
                   />
+                  <ContactChatMediaControls
+                    pending={pending}
+                    onPendingChange={setPending}
+                    disabled={sending}
+                  />
                   <Button
                     type="button"
                     onClick={() => void handleReply()}
-                    disabled={sending || !reply.trim()}
+                    disabled={!canSend}
                     className="w-full sm:w-auto"
                   >
                     {sending ? (

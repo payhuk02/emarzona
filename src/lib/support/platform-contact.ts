@@ -231,19 +231,45 @@ export async function fetchAdminContactThreads(): Promise<PlatformContactThread[
 
 export async function sendAdminContactReply(input: {
   threadId: string;
+  threadUserId: string;
   adminUserId: string;
   content: string;
+  media?: PendingContactMedia[];
 }): Promise<void> {
   const content = input.content.trim();
-  if (!content) throw new Error('La réponse est requise');
+  const media = input.media ?? [];
+  if (!content && media.length === 0) {
+    throw new Error('Écrivez une réponse ou ajoutez une pièce jointe');
+  }
+  if (media.length > MAX_ATTACHMENTS) {
+    throw new Error(`Maximum ${MAX_ATTACHMENTS} pièces jointes`);
+  }
 
-  const { error } = await fromTable('platform_contact_messages').insert({
-    thread_id: input.threadId,
-    sender_type: 'admin',
-    sender_id: input.adminUserId,
-    content,
-  });
+  const { data: msg, error } = await fromTable('platform_contact_messages')
+    .insert({
+      thread_id: input.threadId,
+      sender_type: 'admin',
+      sender_id: input.adminUserId,
+      content,
+    })
+    .select('id')
+    .single();
   if (error) throw error;
+
+  const messageId = (msg as { id: string }).id;
+  if (media.length > 0) {
+    try {
+      // Store under thread owner's folder so the user can read signed URLs
+      await uploadAndLinkAttachments(messageId, input.threadUserId, media);
+    } catch (uploadErr) {
+      if (!content) {
+        await fromTable('platform_contact_messages').delete().eq('id', messageId);
+      }
+      throw uploadErr instanceof Error
+        ? uploadErr
+        : new Error("Échec de l'envoi des pièces jointes");
+    }
+  }
 }
 
 export async function markAdminThreadRead(threadId: string): Promise<void> {
@@ -251,4 +277,21 @@ export async function markAdminThreadRead(threadId: string): Promise<void> {
     p_thread_id: threadId,
   });
   if (error) throw error;
+}
+
+export async function fetchAdminContactUnreadTotal(): Promise<number> {
+  const { data, error } = await rpc('platform_contact_admin_unread_total');
+  if (error) {
+    // Fallback if RPC not yet applied
+    const { data: rows, error: listErr } = await fromTable('platform_contact_threads')
+      .select('admin_unread_count')
+      .gt('admin_unread_count', 0);
+    if (listErr) throw error;
+    const sum = ((rows as { admin_unread_count: number }[]) ?? []).reduce(
+      (acc, r) => acc + (r.admin_unread_count || 0),
+      0
+    );
+    return sum;
+  }
+  return typeof data === 'number' ? data : Number(data) || 0;
 }

@@ -35,11 +35,10 @@ import {
   type PlatformContactMessage,
   type PlatformContactThread,
 } from '@/lib/support/platform-contact';
-import { ContactChatMedia } from '@/components/support/ContactChatMedia';
+import { ContactChatMessageList } from '@/components/support/ContactChatMessageList';
 import { CameraCapture } from '@/components/camera/CameraCapture';
-import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
 import { EMARZONA_DEFAULT_LOGO_PUBLIC } from '@/lib/brand/emarzona-logo';
+import { describeMediaPermissionError } from '@/lib/support/media-permission-error';
 
 const MAX_PENDING = 5;
 const MAX_RECORD_SECS = 120;
@@ -94,6 +93,9 @@ export function ContactChatWidget() {
   const [cameraOpen, setCameraOpen] = useState(false);
   const [recording, setRecording] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
+  /** Keyboard lift (px) — keeps composer above soft keyboard on mobile */
+  const [keyboardInset, setKeyboardInset] = useState(0);
+  const [composerFocused, setComposerFocused] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const messagesScrollRef = useRef<HTMLDivElement>(null);
@@ -105,8 +107,25 @@ export function ContactChatWidget() {
   const recordExtRef = useRef('webm');
   const aliveRef = useRef(true);
   const nameTouchedRef = useRef(false);
+  const composerBlurTimerRef = useRef<number | null>(null);
   const pendingRef = useRef(pending);
   pendingRef.current = pending;
+
+  const onComposerFocus = useCallback(() => {
+    if (composerBlurTimerRef.current) {
+      window.clearTimeout(composerBlurTimerRef.current);
+      composerBlurTimerRef.current = null;
+    }
+    setComposerFocused(true);
+  }, []);
+
+  const onComposerBlur = useCallback(() => {
+    if (composerBlurTimerRef.current) window.clearTimeout(composerBlurTimerRef.current);
+    composerBlurTimerRef.current = window.setTimeout(() => {
+      setComposerFocused(false);
+      composerBlurTimerRef.current = null;
+    }, 180);
+  }, []);
 
   const unread = thread?.user_unread_count ?? 0;
 
@@ -136,6 +155,7 @@ export function ContactChatWidget() {
     aliveRef.current = true;
     return () => {
       aliveRef.current = false;
+      if (composerBlurTimerRef.current) window.clearTimeout(composerBlurTimerRef.current);
       revokePending(pendingRef.current);
       stopRecordingCleanup(true);
     };
@@ -199,13 +219,12 @@ export function ContactChatWidget() {
 
   useEffect(() => {
     if (!open) return;
+    // Only scroll thread when messages change — never on each keystroke
     const el = messagesScrollRef.current;
     if (el) {
       el.scrollTop = el.scrollHeight;
-    } else {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
-  }, [open, messages.length, pending.length, sending]);
+  }, [open, messages.length, sending]);
 
   useEffect(() => {
     if (!open) return;
@@ -225,6 +244,36 @@ export function ContactChatWidget() {
   useEffect(() => {
     if (!open && recording) stopRecordingCleanup(true);
   }, [open, recording, stopRecordingCleanup]);
+
+  // Soft-keyboard: lift panel with visualViewport (stable svh panel, no dvh thrash)
+  useEffect(() => {
+    if (!open || !isMobile) {
+      setKeyboardInset(0);
+      return;
+    }
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const update = () => {
+      const inset = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+      setKeyboardInset(inset > 48 ? inset : 0);
+    };
+
+    update();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+    };
+  }, [open, isMobile]);
+
+  useEffect(() => {
+    if (!open) {
+      setComposerFocused(false);
+      setKeyboardInset(0);
+    }
+  }, [open]);
 
   const addPendingFiles = useCallback(
     (files: FileList | File[]) => {
@@ -357,8 +406,7 @@ export function ContactChatWidget() {
       logger.error('Voice record failed', { error: err });
       toast({
         title: 'Micro inaccessible',
-        description:
-          err instanceof Error ? err.message : 'Autorisez le micro pour envoyer un vocal.',
+        description: describeMediaPermissionError(err, 'microphone'),
         variant: 'destructive',
       });
       stopRecordingCleanup(true);
@@ -424,9 +472,12 @@ export function ContactChatWidget() {
 
   const canSend = Boolean(fullName.trim() && (draft.trim() || pending.length > 0) && !sending);
 
+  // svh = stable while keyboard open (dvh thrashing made typing laggy on mobile)
   const panelHeightClass = liftForBottomNav
-    ? 'h-[min(calc(100dvh-9.75rem),32rem)] max-h-[calc(100dvh-9.75rem)]'
-    : 'h-[min(calc(100dvh-6.75rem),34rem)] max-h-[calc(100dvh-6.75rem)]';
+    ? 'h-[min(calc(100svh-9.75rem),32rem)] max-h-[min(calc(100svh-9.75rem),32rem)]'
+    : 'h-[min(calc(100svh-6.75rem),34rem)] max-h-[min(calc(100svh-6.75rem),34rem)]';
+
+  const shellBottomStyle = keyboardInset > 0 ? ({ bottom: keyboardInset + 8 } as const) : undefined;
 
   if (!user || hideOnAdmin) return null;
 
@@ -436,14 +487,17 @@ export function ContactChatWidget() {
         className={cn(
           'fixed right-3 sm:right-6 z-[60] flex flex-col items-end gap-2.5 sm:gap-3 pointer-events-none',
           'pb-[max(0.25rem,env(safe-area-inset-bottom))]',
-          liftForBottomNav ? 'bottom-[5.25rem] sm:bottom-6' : 'bottom-5 sm:bottom-6'
+          keyboardInset === 0 &&
+            (liftForBottomNav ? 'bottom-[5.25rem] sm:bottom-6' : 'bottom-5 sm:bottom-6')
         )}
+        style={shellBottomStyle}
       >
         {open && (
           <div
             className={cn(
               'pointer-events-auto w-[min(calc(100vw-1.25rem),23.5rem)]',
               panelHeightClass,
+              composerFocused && isMobile && 'max-h-[min(calc(100svh-2.5rem),28rem)]',
               'rounded-2xl overflow-hidden flex flex-col',
               'bg-background border border-black/5',
               'shadow-[0_18px_50px_-12px_rgba(15,23,42,0.35)]',
@@ -484,66 +538,17 @@ export function ContactChatWidget() {
 
             <div
               ref={messagesScrollRef}
-              className="flex-1 min-h-0 overflow-y-auto overscroll-contain bg-[#f8fafc] [-webkit-overflow-scrolling:touch]"
+              className={cn(
+                'flex-1 min-h-0 overflow-y-auto overscroll-contain bg-[#f8fafc] [-webkit-overflow-scrolling:touch]',
+                composerFocused && isMobile && 'min-h-[4rem]'
+              )}
             >
               <div className="px-3 py-2.5">
-                {loading && messages.length === 0 ? (
-                  <div className="flex justify-center py-6 text-muted-foreground">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  </div>
-                ) : messages.length === 0 ? (
-                  <p className="text-xs text-muted-foreground leading-relaxed px-0.5 py-1">
-                    Décrivez votre besoin. Joignez une image, une photo ou un vocal — la réponse
-                    apparaîtra ici.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {messages.map(msg => {
-                      const isUser = msg.sender_type === 'user';
-                      const hasText = Boolean(msg.content?.trim());
-                      return (
-                        <div
-                          key={msg.id}
-                          className={cn(
-                            'flex flex-col gap-0.5',
-                            isUser ? 'items-end' : 'items-start'
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              'max-w-[88%] rounded-2xl px-3 py-2 text-sm break-words shadow-sm',
-                              isUser
-                                ? 'text-white rounded-br-md'
-                                : 'bg-white text-foreground border border-black/5 rounded-bl-md'
-                            )}
-                            style={
-                              isUser
-                                ? {
-                                    background:
-                                      'linear-gradient(135deg, #f97316 0%, #ea580c 55%, #2563eb 160%)',
-                                  }
-                                : undefined
-                            }
-                          >
-                            {hasText && <p className="whitespace-pre-wrap">{msg.content}</p>}
-                            <ContactChatMedia
-                              attachments={msg.attachments ?? []}
-                              className={cn(hasText && 'mt-2')}
-                            />
-                          </div>
-                          <span className="text-[10px] text-muted-foreground px-1">
-                            {isUser ? 'Vous' : 'Support'} ·{' '}
-                            {formatDistanceToNow(new Date(msg.created_at), {
-                              addSuffix: true,
-                              locale: fr,
-                            })}
-                          </span>
-                        </div>
-                      );
-                    })}
-                    <div ref={bottomRef} />
-                  </div>
-                )}
+                <ContactChatMessageList
+                  loading={loading}
+                  messages={messages}
+                  bottomRef={bottomRef}
+                />
               </div>
             </div>
 
@@ -562,11 +567,17 @@ export function ContactChatWidget() {
                     nameTouchedRef.current = true;
                     setFullName(e.target.value);
                   }}
+                  onFocus={onComposerFocus}
+                  onBlur={onComposerBlur}
                   placeholder="Nom et Prénom"
                   maxLength={120}
                   disabled={sending}
                   autoComplete="name"
-                  className="h-9 rounded-xl border-black/10"
+                  autoCorrect="off"
+                  autoCapitalize="words"
+                  enterKeyHint="next"
+                  inputMode="text"
+                  className="h-11 min-h-[44px] rounded-xl border-black/10 text-base touch-manipulation"
                 />
               </div>
 
@@ -578,6 +589,8 @@ export function ContactChatWidget() {
                   id="contact-message"
                   value={draft}
                   onChange={e => setDraft(e.target.value)}
+                  onFocus={onComposerFocus}
+                  onBlur={onComposerBlur}
                   onKeyDown={e => {
                     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && canSend) {
                       e.preventDefault();
@@ -588,7 +601,10 @@ export function ContactChatWidget() {
                   rows={2}
                   maxLength={5000}
                   disabled={sending}
-                  className="min-h-[3.25rem] max-h-24 rounded-xl border-black/10 resize-none"
+                  autoCorrect="on"
+                  autoCapitalize="sentences"
+                  enterKeyHint="send"
+                  className="min-h-[3.5rem] max-h-28 rounded-xl border-black/10 resize-none text-base touch-manipulation"
                 />
               </div>
 
@@ -712,7 +728,9 @@ export function ContactChatWidget() {
             'ring-2 ring-white/90',
             'transition-transform duration-200 hover:scale-105 active:scale-95',
             'flex items-center justify-center touch-manipulation',
-            open && 'scale-95'
+            open && 'scale-95',
+            // Hide FAB while typing on mobile — frees space above keyboard
+            composerFocused && isMobile && keyboardInset > 0 && 'hidden'
           )}
           style={{
             background: 'linear-gradient(145deg, #f97316 0%, #fb923c 45%, #2563eb 100%)',
