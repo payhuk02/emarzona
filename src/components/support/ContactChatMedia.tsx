@@ -3,7 +3,7 @@
  * Audio: authenticated Storage download → Blob/object URL (signed URL fetch often
  * fails on mobile due to CORS / Content-Type / Range). Re-encode to WAV when needed.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FileIcon, ImageOff, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ATTACHMENTS_BUCKET } from '@/lib/attachments/storage-ref';
@@ -66,10 +66,14 @@ function ContactAudioPlayer({
 }) {
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const blobUrlRef = useRef<string | null>(null);
+  const triedSignedFallbackRef = useRef(false);
 
   useEffect(() => {
     let revoked: string | null = null;
     let cancelled = false;
+    triedSignedFallbackRef.current = false;
+    blobUrlRef.current = null;
 
     const run = async () => {
       setFailed(false);
@@ -91,6 +95,7 @@ function ContactAudioPlayer({
         if (cancelled) return;
         const url = URL.createObjectURL(playable);
         revoked = url;
+        blobUrlRef.current = url;
         setObjectUrl(url);
       } catch {
         if (!cancelled) {
@@ -107,10 +112,30 @@ function ContactAudioPlayer({
     return () => {
       cancelled = true;
       if (revoked) URL.revokeObjectURL(revoked);
+      blobUrlRef.current = null;
     };
   }, [storagePath, signedUrl, fileName, fileType]);
 
-  if (failed && !objectUrl) {
+  const handleAudioError = () => {
+    // Blob object URL failed → try signed HTTPS URL once before giving up
+    if (
+      objectUrl &&
+      blobUrlRef.current &&
+      objectUrl === blobUrlRef.current &&
+      signedUrl &&
+      !triedSignedFallbackRef.current
+    ) {
+      triedSignedFallbackRef.current = true;
+      URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
+      setObjectUrl(signedUrl);
+      return;
+    }
+    setFailed(true);
+    setObjectUrl(null);
+  };
+
+  if (failed) {
     return (
       <p className="text-[10px] text-destructive px-1 py-1">Lecture impossible · {fileName}</p>
     );
@@ -135,13 +160,9 @@ function ContactAudioPlayer({
         controlsList="nodownload"
         className="w-full max-w-full h-9"
         src={objectUrl}
-        onError={() => setFailed(true)}
+        onError={handleAudioError}
       />
-      {failed ? (
-        <p className="text-[10px] text-destructive mt-1 px-1">Lecture impossible</p>
-      ) : (
-        <p className="text-[10px] text-muted-foreground mt-1 truncate px-1">{fileName}</p>
-      )}
+      <p className="text-[10px] text-muted-foreground mt-1 truncate px-1">{fileName}</p>
     </>
   );
 }

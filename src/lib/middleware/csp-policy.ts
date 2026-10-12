@@ -20,6 +20,9 @@ export function buildCspHeader(nonce: string): string {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: blob: https:",
+    // Voice chat <audio> uses blob: object URLs (+ signed Supabase URLs as fallback).
+    // Without media-src, browsers inherit default-src 'self' and block playback in prod.
+    "media-src 'self' blob: https://*.supabase.co",
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://api.geniuspay.com https://storage.googleapis.com https://api.exchangerate-api.com https://cloudflareinsights.com https://ipapi.co https://*.i.posthog.com https://*.posthog.com",
     "frame-src 'self' https://*.supabase.co",
     "object-src 'none'",

@@ -22,4 +22,11 @@ describe('csp-policy', () => {
     const header = buildCspHeader('n');
     expect(header).toMatch(/connect-src[^;]*'self'/);
   });
+
+  it('media-src allows blob and Supabase for contact voice playback', () => {
+    const header = buildCspHeader('n');
+    expect(header).toMatch(/media-src[^;]*'self'/);
+    expect(header).toMatch(/media-src[^;]*blob:/);
+    expect(header).toMatch(/media-src[^;]*https:\/\/\*\.supabase\.co/);
+  });
 });

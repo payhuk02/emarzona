@@ -27,4 +27,5 @@ Remettre le bloc `Content-Security-Policy` dans `vercel.json` et retirer le trai
 
 - `'strict-dynamic'` autorise les scripts chargés par un script nonceé (Vite chunks).
 - `style-src 'unsafe-inline'` conservé (Tailwind runtime).
+- `media-src 'self' blob: https://*.supabase.co` — requis pour le chat vocal (`<audio>` en blob: / URL signée Supabase). Sans cette directive, la lecture tombe sur `default-src 'self'` → « Lecture impossible » en prod.
 - Report URI : `/api/csp-report` (endpoint à brancher si besoin).
