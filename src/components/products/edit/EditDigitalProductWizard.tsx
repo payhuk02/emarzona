@@ -376,35 +376,43 @@ export const EditDigitalProductWizard = ({
       productId,
     });
 
-  const handleUpdateFormData = useCallback((updates: DigitalProductFormDataUpdate) => {
-    setFormData(prev => {
-      const newData = { ...prev, ...updates };
+  const handleUpdateFormData = useCallback(
+    (
+      updates:
+        | DigitalProductFormDataUpdate
+        | ((prev: Partial<DigitalProductFormData>) => DigitalProductFormDataUpdate)
+    ) => {
+      setFormData(prev => {
+        const resolved = typeof updates === 'function' ? updates(prev) : updates;
+        const newData = { ...prev, ...resolved };
 
-      if (updates.affiliate) {
-        newData.affiliate = {
-          ...prev.affiliate,
-          ...updates.affiliate,
-        } as DigitalProductFormData['affiliate'];
-      }
+        if (resolved.affiliate) {
+          newData.affiliate = {
+            ...prev.affiliate,
+            ...resolved.affiliate,
+          } as DigitalProductFormData['affiliate'];
+        }
 
-      if (updates.seo) {
-        newData.seo = {
-          ...prev.seo,
-          ...updates.seo,
-        } as DigitalProductFormData['seo'];
-      }
+        if (resolved.seo) {
+          newData.seo = {
+            ...prev.seo,
+            ...resolved.seo,
+          } as DigitalProductFormData['seo'];
+        }
 
-      if (updates.faqs) {
-        newData.faqs = updates.faqs;
-      }
+        if (resolved.faqs) {
+          newData.faqs = resolved.faqs;
+        }
 
-      if (updates.downloadable_files) {
-        newData.downloadable_files = updates.downloadable_files;
-      }
+        if (resolved.downloadable_files) {
+          newData.downloadable_files = resolved.downloadable_files;
+        }
 
-      return newData;
-    });
-  }, []);
+        return newData;
+      });
+    },
+    []
+  );
 
   /**
    * Validate current step

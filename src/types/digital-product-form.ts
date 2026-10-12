@@ -131,3 +131,8 @@ export type DigitalProductFormDataUpdate = Partial<DigitalProductFormData> & {
   faqs?: DigitalProductFAQ[];
   downloadable_files?: DigitalProductDownloadableFile[];
 };
+
+/** Patch object or functional updater (needed after await upload so gallery merge sees latest delete). */
+export type DigitalProductFormDataUpdater =
+  | DigitalProductFormDataUpdate
+  | ((prev: Partial<DigitalProductFormData>) => DigitalProductFormDataUpdate);

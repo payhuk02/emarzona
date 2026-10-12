@@ -20,7 +20,11 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
-import { appendProductGalleryImages } from '@/lib/products/product-gallery-images';
+import {
+  appendProductGalleryImages,
+  getDisplayGalleryImages,
+  removeProductGalleryImage,
+} from '@/lib/products/product-gallery-images';
 import type { CourseSEOData } from '@/components/courses/create/CourseSEOForm';
 
 interface CourseBasicInfoFormProps {
@@ -91,6 +95,7 @@ export const CourseBasicInfoForm = ({
   const [customCategory, setCustomCategory] = useState<string>('');
   const formDataRef = useRef(formData);
   formDataRef.current = formData;
+  const galleryImages = getDisplayGalleryImages(formData);
 
   // Vérifier si la catégorie actuelle est "Autre" ou une valeur personnalisée
   const isCustomCategory =
@@ -156,6 +161,7 @@ export const CourseBasicInfoForm = ({
       const validUrls = await uploadMany(Array.from(files), { maxSizeBytes: maxSize });
 
       if (validUrls.length > 0) {
+        // Use latest ref after await (covers delete→upload without stale image_url)
         const gallery = appendProductGalleryImages(formDataRef.current, validUrls);
         onChange('images', gallery.images);
         onChange('image_url', gallery.image_url);
@@ -178,16 +184,9 @@ export const CourseBasicInfoForm = ({
   };
 
   const handleRemoveImage = (index: number) => {
-    const current = formDataRef.current;
-    const list =
-      current.images && current.images.length > 0
-        ? current.images
-        : current.image_url
-          ? [current.image_url]
-          : [];
-    const newImages = list.filter((_, i) => i !== index);
-    onChange('images', newImages);
-    onChange('image_url', newImages[0] || '');
+    const gallery = removeProductGalleryImage(formDataRef.current, index);
+    onChange('images', gallery.images);
+    onChange('image_url', gallery.image_url);
   };
 
   return (
@@ -646,16 +645,11 @@ export const CourseBasicInfoForm = ({
               Ajoutez plusieurs images pour montrer différents aspects de votre cours
             </p>
 
-            {/* Grille — `images[]` only; fall back to image_url when images empty */}
-            {(formData.images && formData.images.length > 0) || formData.image_url ? (
+            {/* Grille: empty images[] after delete must NOT fall back to image_url */}
+            {galleryImages.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                {(formData.images && formData.images.length > 0
-                  ? formData.images
-                  : formData.image_url
-                    ? [formData.image_url]
-                    : []
-                ).map((imageUrl: string, index: number) => (
-                  <div key={imageUrl || `img-${index}`} className="relative group">
+                {galleryImages.map((imageUrl: string, index: number) => (
+                  <div key={`${imageUrl}-${index}`} className="relative group">
                     <img
                       src={imageUrl}
                       alt={`Cours ${index + 1}`}
@@ -669,7 +663,7 @@ export const CourseBasicInfoForm = ({
                       type="button"
                       variant="destructive"
                       size="icon"
-                      className="absolute top-1 right-1 h-11 w-11 rounded-full opacity-0 group-hover:opacity-100 transition-opacity touch-manipulation min-h-[44px] min-w-[44px]"
+                      className="absolute top-1 right-1 h-11 w-11 rounded-full shadow-md touch-manipulation min-h-[44px] min-w-[44px] z-10"
                       onClick={() => handleRemoveImage(index)}
                       disabled={uploadingImage}
                       aria-label={`Supprimer l'image ${index + 1} du cours`}

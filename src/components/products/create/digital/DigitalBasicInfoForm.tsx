@@ -34,16 +34,20 @@ import { cn } from '@/lib/utils';
 import { getCategoriesForProductType } from '@/constants/product-categories';
 import { mapCategoryToDigitalType } from '@/lib/digital/digital-product-display';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
-import { appendProductGalleryImages } from '@/lib/products/product-gallery-images';
+import {
+  appendProductGalleryImages,
+  getDisplayGalleryImages,
+  removeProductGalleryImage,
+} from '@/lib/products/product-gallery-images';
 
 import type {
   DigitalProductFormData,
-  DigitalProductFormDataUpdate,
+  DigitalProductFormDataUpdater,
 } from '@/types/digital-product-form';
 
 interface DigitalBasicInfoFormProps {
   formData: DigitalProductFormData;
-  updateFormData: (updates: DigitalProductFormDataUpdate) => void;
+  updateFormData: (updates: DigitalProductFormDataUpdater) => void;
   storeSlug: string;
 }
 
@@ -69,12 +73,9 @@ export const DigitalBasicInfoForm = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const nameValueRef = useRef<string>(formData.name || '');
   const isUpdatingFromFormDataRef = useRef(false);
-  // Latest form after delete — upload await must not close over a stale gallery
-  const formDataRef = useRef(formData);
-  formDataRef.current = formData;
-
   // Hook pour corriger le problème d'espacement
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
+  const galleryImages = getDisplayGalleryImages(formData);
 
   // Vérifier si la catégorie actuelle est "autre" ou une valeur personnalisée
   const isCustomCategory =
@@ -568,16 +569,11 @@ export const DigitalBasicInfoForm = ({
           WebP ou JPEG, pour un rendu optimal sur la boutique et le marketplace.
         </p>
 
-        {/* Grille d'images — `images[]` only (image_url synced on delete/upload/save) */}
-        {(formData.images && formData.images.length > 0) || formData.image_url ? (
+        {/* Grille: Array.isArray(images) wins — empty [] after delete must NOT fall back to image_url */}
+        {galleryImages.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-            {(formData.images && formData.images.length > 0
-              ? formData.images
-              : formData.image_url
-                ? [formData.image_url]
-                : []
-            ).map((imageUrl: string, index: number) => (
-              <div key={imageUrl || `img-${index}`} className="relative group">
+            {galleryImages.map((imageUrl: string, index: number) => (
+              <div key={`${imageUrl}-${index}`} className="relative group">
                 <img
                   src={imageUrl}
                   alt={`Produit ${index + 1}`}
@@ -593,18 +589,7 @@ export const DigitalBasicInfoForm = ({
                   size="icon"
                   className="absolute top-1 right-1 h-9 w-9 sm:h-10 sm:w-10 rounded-full shadow-md touch-manipulation min-h-[36px] min-w-[36px] z-10"
                   onClick={() => {
-                    const current = formDataRef.current;
-                    const list =
-                      current.images && current.images.length > 0
-                        ? current.images
-                        : current.image_url
-                          ? [current.image_url]
-                          : [];
-                    const newImages = list.filter((_: string, i: number) => i !== index);
-                    updateFormData({
-                      images: newImages,
-                      image_url: newImages[0] || '',
-                    });
+                    updateFormData(prev => removeProductGalleryImage(prev, index));
                   }}
                   disabled={uploadingImage}
                   aria-label={`Supprimer l'image ${index + 1}`}
@@ -710,8 +695,8 @@ export const DigitalBasicInfoForm = ({
               const validUrls = await uploadMany(Array.from(files), { maxSizeBytes: maxSize });
 
               if (validUrls.length > 0) {
-                const gallery = appendProductGalleryImages(formDataRef.current, validUrls);
-                updateFormData(gallery);
+                // Functional update: merge against post-delete state, not a stale closure
+                updateFormData(prev => appendProductGalleryImages(prev, validUrls));
 
                 toast({
                   title: '✅ Images uploadées',

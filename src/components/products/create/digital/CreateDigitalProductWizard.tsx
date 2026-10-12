@@ -122,8 +122,15 @@ export const CreateDigitalProductWizard = ({
   /**
    * Update form data
    */
-  const updateFormData = (updates: Partial<DigitalProductData>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
+  const updateFormData = (
+    updates:
+      | Partial<DigitalProductData>
+      | ((prev: Partial<DigitalProductData>) => Partial<DigitalProductData>)
+  ) => {
+    setFormData(prev => {
+      const resolved = typeof updates === 'function' ? updates(prev) : updates;
+      return { ...prev, ...resolved };
+    });
   };
 
   /**

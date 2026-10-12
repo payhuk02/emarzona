@@ -8,6 +8,18 @@ export type ProductGalleryState = {
 };
 
 /**
+ * URLs to show in the edit gallery.
+ * If `images` is an array (including []), it wins — never fall back to `image_url`
+ * after a delete left images empty (that resurrected the old primary in the UI).
+ */
+export function getDisplayGalleryImages(current: ProductGalleryState): string[] {
+  if (Array.isArray(current.images)) {
+    return current.images.filter(Boolean);
+  }
+  return current.image_url ? [current.image_url] : [];
+}
+
+/**
  * Append newly uploaded URLs without resurrecting a cleared gallery.
  * - If `images` is an array (even empty after delete), use it as base — do NOT re-inject `image_url`.
  * - Only fall back to `image_url` when `images` is still undefined/null (legacy load).
@@ -16,16 +28,21 @@ export function appendProductGalleryImages(
   current: ProductGalleryState,
   newUrls: string[]
 ): { images: string[]; image_url: string } {
-  const base = Array.isArray(current.images)
-    ? current.images
-    : current.image_url
-      ? [current.image_url]
-      : [];
+  const base = getDisplayGalleryImages(current);
 
   const images = [...base, ...newUrls].filter(
     (url, index, self) => Boolean(url) && self.indexOf(url) === index
   );
 
+  return { images, image_url: images[0] ?? '' };
+}
+
+/** Remove one gallery slot and sync image_url to the new first image (or ''). */
+export function removeProductGalleryImage(
+  current: ProductGalleryState,
+  index: number
+): { images: string[]; image_url: string } {
+  const images = getDisplayGalleryImages(current).filter((_, i) => i !== index);
   return { images, image_url: images[0] ?? '' };
 }
 

@@ -300,44 +300,50 @@ export const CreateDigitalProductWizard = ({
    * Update form data with auto-save
    */
   const updateFormData = useCallback(
-    (updates: DigitalProductFormDataUpdate) => {
-      // Log pour diagnostiquer le problème d'espacement
-      if (updates.name !== undefined) {
-        logger.info('updateFormData - name update', {
-          newName: updates.name,
-          hasSpaces: updates.name.includes(' '),
-          length: updates.name.length,
-          charCodes: updates.name.split('').map((c: string) => c.charCodeAt(0)),
-        });
-      }
-
+    (
+      updates:
+        | DigitalProductFormDataUpdate
+        | ((prev: DigitalProductFormData) => DigitalProductFormDataUpdate)
+    ) => {
       setFormData((prev: DigitalProductFormData) => {
+        const resolved = typeof updates === 'function' ? updates(prev) : updates;
+
+        // Log pour diagnostiquer le problème d'espacement
+        if (resolved.name !== undefined) {
+          logger.info('updateFormData - name update', {
+            newName: resolved.name,
+            hasSpaces: resolved.name.includes(' '),
+            length: resolved.name.length,
+            charCodes: resolved.name.split('').map((c: string) => c.charCodeAt(0)),
+          });
+        }
+
         const newData = {
           ...prev,
-          ...updates,
+          ...resolved,
         };
 
-        if (updates?.affiliate) {
+        if (resolved?.affiliate) {
           newData.affiliate = {
             ...prev.affiliate,
-            ...updates.affiliate,
+            ...resolved.affiliate,
           };
         }
 
-        if (updates?.seo) {
+        if (resolved?.seo) {
           newData.seo = {
             ...prev.seo,
-            ...updates.seo,
+            ...resolved.seo,
           };
         }
 
-        if (updates?.faqs) {
-          newData.faqs = Array.isArray(updates.faqs) ? updates.faqs : prev.faqs;
+        if (resolved?.faqs) {
+          newData.faqs = Array.isArray(resolved.faqs) ? resolved.faqs : prev.faqs;
         }
 
-        if (updates?.downloadable_files) {
-          newData.downloadable_files = Array.isArray(updates.downloadable_files)
-            ? updates.downloadable_files
+        if (resolved?.downloadable_files) {
+          newData.downloadable_files = Array.isArray(resolved.downloadable_files)
+            ? resolved.downloadable_files
             : prev.downloadable_files;
         }
 
