@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
+import { appendProductGalleryImages } from '@/lib/products/product-gallery-images';
 import type { CourseSEOData } from '@/components/courses/create/CourseSEOForm';
 
 interface CourseBasicInfoFormProps {
@@ -88,6 +89,8 @@ export const CourseBasicInfoForm = ({
     progress: uploadProgress,
   } = useProductImageUpload('courses');
   const [customCategory, setCustomCategory] = useState<string>('');
+  const formDataRef = useRef(formData);
+  formDataRef.current = formData;
 
   // Vérifier si la catégorie actuelle est "Autre" ou une valeur personnalisée
   const isCustomCategory =
@@ -153,14 +156,9 @@ export const CourseBasicInfoForm = ({
       const validUrls = await uploadMany(Array.from(files), { maxSizeBytes: maxSize });
 
       if (validUrls.length > 0) {
-        const currentImages = formData.images || [];
-        const existingImageUrl = formData.image_url ? [formData.image_url] : [];
-        const allImages = [...existingImageUrl, ...currentImages, ...validUrls].filter(
-          (url, index, self) => self.indexOf(url) === index // Supprimer les doublons
-        );
-
-        onChange('images', allImages);
-        onChange('image_url', allImages[0] || formData.image_url); // Première image comme image_url
+        const gallery = appendProductGalleryImages(formDataRef.current, validUrls);
+        onChange('images', gallery.images);
+        onChange('image_url', gallery.image_url);
 
         toast({
           title: '✅ Images uploadées',
@@ -180,10 +178,10 @@ export const CourseBasicInfoForm = ({
   };
 
   const handleRemoveImage = (index: number) => {
-    const currentImages = formData.images || [];
+    const currentImages = formDataRef.current.images || [];
     const newImages = currentImages.filter((_, i) => i !== index);
     onChange('images', newImages);
-    onChange('image_url', newImages[0] || ''); // Première image comme image_url
+    onChange('image_url', newImages[0] || '');
   };
 
   return (
@@ -647,7 +645,7 @@ export const CourseBasicInfoForm = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-3">
                 {/* Afficher les images du tableau images */}
                 {(formData.images || []).map((imageUrl: string, index: number) => (
-                  <div key={index} className="relative group">
+                  <div key={imageUrl || `img-${index}`} className="relative group">
                     <img
                       src={imageUrl}
                       alt={`Cours ${index + 1}`}

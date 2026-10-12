@@ -34,6 +34,7 @@ import { cn } from '@/lib/utils';
 import { getCategoriesForProductType } from '@/constants/product-categories';
 import { mapCategoryToDigitalType } from '@/lib/digital/digital-product-display';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
+import { appendProductGalleryImages } from '@/lib/products/product-gallery-images';
 
 import type {
   DigitalProductFormData,
@@ -68,6 +69,9 @@ export const DigitalBasicInfoForm = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const nameValueRef = useRef<string>(formData.name || '');
   const isUpdatingFromFormDataRef = useRef(false);
+  // Latest form after delete — upload await must not close over a stale gallery
+  const formDataRef = useRef(formData);
+  formDataRef.current = formData;
 
   // Hook pour corriger le problème d'espacement
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
@@ -569,7 +573,7 @@ export const DigitalBasicInfoForm = ({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
             {/* Afficher les images du tableau images */}
             {(formData.images || []).map((imageUrl: string, index: number) => (
-              <div key={index} className="relative group">
+              <div key={imageUrl || `img-${index}`} className="relative group">
                 <img
                   src={imageUrl}
                   alt={`Produit ${index + 1}`}
@@ -585,9 +589,8 @@ export const DigitalBasicInfoForm = ({
                   size="icon"
                   className="absolute top-1 right-1 h-9 w-9 sm:h-10 sm:w-10 rounded-full shadow-md touch-manipulation min-h-[36px] min-w-[36px] z-10"
                   onClick={() => {
-                    const currentImages = formData.images || [];
+                    const currentImages = formDataRef.current.images || [];
                     const newImages = currentImages.filter((_: string, i: number) => i !== index);
-                    // Mettre à jour images et image_url (première image)
                     updateFormData({
                       images: newImages,
                       image_url: newImages[0] || '',
@@ -726,16 +729,8 @@ export const DigitalBasicInfoForm = ({
               const validUrls = await uploadMany(Array.from(files), { maxSizeBytes: maxSize });
 
               if (validUrls.length > 0) {
-                const currentImages = formData.images || [];
-                const existingImageUrl = formData.image_url ? [formData.image_url] : [];
-                const allImages = [...existingImageUrl, ...currentImages, ...validUrls].filter(
-                  (url, index, self) => self.indexOf(url) === index // Supprimer les doublons
-                );
-
-                updateFormData({
-                  images: allImages,
-                  image_url: allImages[0] || formData.image_url, // Première image comme image_url
-                });
+                const gallery = appendProductGalleryImages(formDataRef.current, validUrls);
+                updateFormData(gallery);
 
                 toast({
                   title: '✅ Images uploadées',

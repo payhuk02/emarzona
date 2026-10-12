@@ -3,7 +3,8 @@
  * Date: 28 Janvier 2025
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { appendProductGalleryImages } from '@/lib/products/product-gallery-images';
 import { Label } from '@/components/ui/label';
 import { RichTextEditorPro } from '@/components/ui/rich-text-editor-pro';
 import { PRODUCT_DESCRIPTION_MAX_WORDS } from '@/constants/product-description';
@@ -78,6 +79,8 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const [artworkLinkUrl, setArtworkLinkUrl] = useState(data.artwork_link_url || '');
   const [isManuallyEdited, setIsManuallyEdited] = useState(false);
+  const dataRef = useRef(data);
+  dataRef.current = data;
 
   // Keep category in the filtered list when artist_type changes
   React.useEffect(() => {
@@ -202,8 +205,8 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
       }
 
       const uploadedUrls = await uploadMany(Array.from(files));
-      const currentImages = data.images || [];
-      onUpdate({ images: [...currentImages, ...uploadedUrls] });
+      const gallery = appendProductGalleryImages(dataRef.current, uploadedUrls);
+      onUpdate({ images: gallery.images });
 
       toast({
         title: '✅ Images uploadées',
@@ -223,7 +226,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
   };
 
   const handleRemoveImage = (index: number) => {
-    const currentImages = data.images || [];
+    const currentImages = dataRef.current.images || [];
     const newImages = currentImages.filter((_, i) => i !== index);
     onUpdate({ images: newImages });
   };

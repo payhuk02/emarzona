@@ -4,7 +4,7 @@
  * ✅ Upload images Supabase Storage implémenté
  */
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +22,7 @@ import { generateSlug } from '@/lib/store-utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useStore } from '@/hooks/useStore';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
+import { appendProductGalleryImages } from '@/lib/products/product-gallery-images';
 import { PRODUCT_DESCRIPTION_MAX_WORDS } from '@/constants/product-description';
 
 import { getCategoriesForProductType } from '@/constants/product-categories';
@@ -47,6 +48,8 @@ export const PhysicalBasicInfoForm = ({
   const [slugChecking, setSlugChecking] = useState(false);
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
+  const dataRef = useRef(data);
+  dataRef.current = data;
 
   /**
    * Check slug availability
@@ -92,7 +95,8 @@ export const PhysicalBasicInfoForm = ({
       const validUrls = await uploadMany(Array.from(files));
 
       if (validUrls.length > 0) {
-        onUpdate({ images: [...(data.images || []), ...validUrls] });
+        const gallery = appendProductGalleryImages(dataRef.current, validUrls);
+        onUpdate({ images: gallery.images });
 
         toast({
           title: '✅ Images uploadées',
@@ -112,7 +116,7 @@ export const PhysicalBasicInfoForm = ({
   };
 
   const handleRemoveImage = (index: number) => {
-    const newImages = [...(data.images || [])];
+    const newImages = [...(dataRef.current.images || [])];
     newImages.splice(index, 1);
     onUpdate({ images: newImages });
   };

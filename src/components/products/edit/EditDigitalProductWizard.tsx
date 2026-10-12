@@ -6,8 +6,9 @@
  * Permet de modifier toutes les étapes comme dans le wizard de création
  */
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import React from 'react';
+import { normalizeProductGallery } from '@/lib/products/product-gallery-images';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -201,12 +202,10 @@ const convertToFormData = async (
     category: product.category || 'ebook',
     digital_type:
       mapCategoryToDigitalType(product.category) || digitalProduct?.digital_type || 'other',
-    image_url: product.image_url || '',
-    images: Array.isArray(product.images)
-      ? (product.images as string[])
-      : product.images
-        ? [String(product.images)]
-        : [],
+    ...(() => {
+      const gallery = normalizeProductGallery(product.images, product.image_url);
+      return { images: gallery.images, image_url: gallery.image_url };
+    })(),
     price: product.price || 0,
     promotional_price: product.promotional_price || null,
     currency: product.currency || 'XOF',
@@ -356,13 +355,15 @@ export const EditDigitalProductWizard = ({
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<DigitalProductFormData>>({});
   const [validationErrors, setValidationErrors] = useState<Record<number, string[]>>({});
+  const hydratedProductIdRef = useRef<string | null>(null);
 
-  // Initialize form data when product is loaded
+  // Hydrate once per productId — refetch must not wipe local delete/upload edits
   useEffect(() => {
-    if (formDataInitial) {
-      setFormData(formDataInitial);
-    }
-  }, [formDataInitial]);
+    if (!formDataInitial || !productId) return;
+    if (hydratedProductIdRef.current === productId) return;
+    hydratedProductIdRef.current = productId;
+    setFormData(formDataInitial);
+  }, [formDataInitial, productId]);
 
   // Server validation hook
   const { validateDigitalProduct: validateDigitalProductServer, clearServerErrors } =

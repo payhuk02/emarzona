@@ -6,8 +6,9 @@
  * Permet de modifier toutes les étapes comme dans le wizard de création
  */
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import React from 'react';
+import { normalizeProductGallery } from '@/lib/products/product-gallery-images';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -244,8 +245,10 @@ const convertToFormData = async (
       level: course?.level || '',
       language: course?.language || 'fr',
       category: product.category || '',
-      image_url: product.image_url || '',
-      images: product.images || [],
+      ...(() => {
+        const gallery = normalizeProductGallery(product.images, product.image_url);
+        return { images: gallery.images, image_url: gallery.image_url };
+      })(),
       price: product.price || 0,
       currency: product.currency || 'XOF',
       promotional_price: product.promotional_price || undefined,
@@ -404,17 +407,20 @@ export const EditCourseProductWizard = ({
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Initialize form data when course is loaded
+  const hydratedProductIdRef = useRef<string | null>(null);
+
+  // Hydrate once per productId — refetch must not wipe local delete/upload edits
   useEffect(() => {
-    if (courseData) {
-      setFormData(courseData.formData);
-      setSections(courseData.sections);
-      setSeoData(courseData.seoData);
-      setFaqs(courseData.faqs);
-      setAffiliateData(courseData.affiliateData);
-      setPixelsData(courseData.pixelsData);
-    }
-  }, [courseData]);
+    if (!courseData || !productId) return;
+    if (hydratedProductIdRef.current === productId) return;
+    hydratedProductIdRef.current = productId;
+    setFormData(courseData.formData);
+    setSections(courseData.sections);
+    setSeoData(courseData.seoData);
+    setFaqs(courseData.faqs);
+    setAffiliateData(courseData.affiliateData);
+    setPixelsData(courseData.pixelsData);
+  }, [courseData, productId]);
 
   const handleFieldChange = useCallback((field: string, value: unknown) => {
     setFormData(prev => ({

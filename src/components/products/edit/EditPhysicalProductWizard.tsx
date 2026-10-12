@@ -438,12 +438,15 @@ export const EditPhysicalProductWizard = ({
   const [formData, setFormData] = useState<Partial<PhysicalProductFormData>>({});
   const [validationErrors, setValidationErrors] = useState<Record<number, string[]>>({});
 
-  // Initialize form data when product is loaded
+  const hydratedProductIdRef = useRef<string | null>(null);
+
+  // Hydrate once per productId — refetch must not wipe local delete/upload edits
   useEffect(() => {
-    if (formDataInitial) {
-      setFormData(formDataInitial);
-    }
-  }, [formDataInitial]);
+    if (!formDataInitial || !productId) return;
+    if (hydratedProductIdRef.current === productId) return;
+    hydratedProductIdRef.current = productId;
+    setFormData(formDataInitial);
+  }, [formDataInitial, productId]);
 
   // Server validation hook
   const {

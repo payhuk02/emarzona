@@ -39,7 +39,8 @@ import {
 import { createDefaultGigPackageDrafts } from '@/lib/services/service-gig-package-drafts';
 import { createDefaultBriefFields } from '@/lib/services/service-delivery-commerce';
 import { ServiceCategorySpecificFields } from './ServiceCategorySpecificFields';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { appendProductGalleryImages } from '@/lib/products/product-gallery-images';
 
 interface ServiceBasicInfoFormProps {
   data: Partial<ServiceProductFormData>;
@@ -52,6 +53,8 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
   const { uploadMany, uploading, progress: uploadProgress } = useProductImageUpload('services');
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const { tree, isLoading: categoriesLoading } = useServiceCategoryTree();
+  const dataRef = useRef(data);
+  dataRef.current = data;
 
   const resolvedCategory = useMemo(
     () => resolveServiceCategorySelection(tree, data.parent_category_id, data.category_id),
@@ -161,7 +164,8 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
       const validUrls = await uploadMany(Array.from(files));
 
       if (validUrls.length > 0) {
-        onUpdate({ images: [...(data.images || []), ...validUrls] });
+        const gallery = appendProductGalleryImages(dataRef.current, validUrls);
+        onUpdate({ images: gallery.images });
 
         toast({
           title: '✅ Images uploadées',
@@ -181,7 +185,7 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
   };
 
   const handleRemoveImage = (index: number) => {
-    const newImages = [...(data.images || [])];
+    const newImages = [...(dataRef.current.images || [])];
     newImages.splice(index, 1);
     onUpdate({ images: newImages });
   };
