@@ -178,8 +178,14 @@ export const CourseBasicInfoForm = ({
   };
 
   const handleRemoveImage = (index: number) => {
-    const currentImages = formDataRef.current.images || [];
-    const newImages = currentImages.filter((_, i) => i !== index);
+    const current = formDataRef.current;
+    const list =
+      current.images && current.images.length > 0
+        ? current.images
+        : current.image_url
+          ? [current.image_url]
+          : [];
+    const newImages = list.filter((_, i) => i !== index);
     onChange('images', newImages);
     onChange('image_url', newImages[0] || '');
   };
@@ -640,11 +646,15 @@ export const CourseBasicInfoForm = ({
               Ajoutez plusieurs images pour montrer différents aspects de votre cours
             </p>
 
-            {/* Grille d'images existantes */}
+            {/* Grille — `images[]` only; fall back to image_url when images empty */}
             {(formData.images && formData.images.length > 0) || formData.image_url ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                {/* Afficher les images du tableau images */}
-                {(formData.images || []).map((imageUrl: string, index: number) => (
+                {(formData.images && formData.images.length > 0
+                  ? formData.images
+                  : formData.image_url
+                    ? [formData.image_url]
+                    : []
+                ).map((imageUrl: string, index: number) => (
                   <div key={imageUrl || `img-${index}`} className="relative group">
                     <img
                       src={imageUrl}
@@ -668,35 +678,6 @@ export const CourseBasicInfoForm = ({
                     </Button>
                   </div>
                 ))}
-
-                {/* Afficher image_url si elle existe et n'est pas dans images */}
-                {formData.image_url &&
-                  (!formData.images || !formData.images.includes(formData.image_url)) && (
-                    <div className="relative group">
-                      <img
-                        src={formData.image_url}
-                        alt="Preview cours"
-                        className="w-full h-32 object-cover rounded-lg border"
-                        loading="lazy"
-                        onError={e => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-1 right-1 h-11 w-11 rounded-full opacity-0 group-hover:opacity-100 transition-opacity touch-manipulation min-h-[44px] min-w-[44px]"
-                        onClick={() => {
-                          onChange('image_url', '');
-                        }}
-                        disabled={uploadingImage}
-                        aria-label="Supprimer l'image principale du cours"
-                      >
-                        <X className="h-4 w-4" aria-hidden="true" />
-                      </Button>
-                    </div>
-                  )}
 
                 {/* Zone d'ajout d'image */}
                 <label

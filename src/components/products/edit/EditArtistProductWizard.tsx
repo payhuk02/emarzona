@@ -42,7 +42,10 @@ import { ProductSEOForm } from '../create/shared/ProductSEOForm';
 import { ProductFAQForm } from '../create/shared/ProductFAQForm';
 import { PaymentOptionsForm } from '../create/shared/PaymentOptionsForm';
 import { useToast } from '@/hooks/use-toast';
-import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
+import {
+  useCatalogCacheInvalidation,
+  useProductEditCacheInvalidation,
+} from '@/hooks/useCatalogCacheInvalidation';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -171,6 +174,7 @@ export const EditArtistProductWizard = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const invalidateCatalog = useCatalogCacheInvalidation();
+  const invalidateProductEdit = useProductEditCacheInvalidation();
   const { user } = useAuth();
   const { store: hookStore, loading: storeLoading } = useStore();
   const storeId = propsStoreId || hookStore?.id;
@@ -246,13 +250,16 @@ export const EditArtistProductWizard = ({
     is_active: true,
   });
 
-  // Load product data when available
+  const hydratedProductIdRef = useRef<string | null>(null);
+
+  // Hydrate once per productId — refetch must not wipe local delete/upload edits
   useEffect(() => {
-    if (artistProductData) {
-      const convertedData = convertToFormData(artistProductData, artistProductData.product);
-      setFormData(convertedData);
-      logger.info('Product data loaded for editing', { productId });
-    }
+    if (!artistProductData || !productId) return;
+    if (hydratedProductIdRef.current === productId) return;
+    hydratedProductIdRef.current = productId;
+    const convertedData = convertToFormData(artistProductData, artistProductData.product);
+    setFormData(convertedData);
+    logger.info('Product data loaded for editing', { productId });
   }, [artistProductData, productId]);
 
   // Load affiliate settings for this product
@@ -608,6 +615,13 @@ export const EditArtistProductWizard = ({
 
       if (!isDraft) {
         invalidateCatalog();
+        if (artistProductData?.product_id) {
+          invalidateProductEdit(artistProductData.product_id, [
+            'artist-product',
+            'artist-product-edit',
+          ]);
+        }
+        hydratedProductIdRef.current = null;
       }
 
       if (onSuccess) {

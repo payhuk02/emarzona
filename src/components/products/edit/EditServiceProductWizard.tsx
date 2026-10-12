@@ -68,7 +68,10 @@ import {
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import type { ServiceProductFormData } from '@/types/service-product';
-import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
+import {
+  useCatalogCacheInvalidation,
+  useProductEditCacheInvalidation,
+} from '@/hooks/useCatalogCacheInvalidation';
 import { useQuery } from '@tanstack/react-query';
 
 const STEP_COMPONENTS = {
@@ -112,6 +115,7 @@ export const EditServiceProductWizard = ({
     : null;
   const { tree: categoryTree } = useServiceCategoryTree();
   const invalidateCatalog = useCatalogCacheInvalidation();
+  const invalidateProductEdit = useProductEditCacheInvalidation();
 
   // Load existing product with security validation and cache optimisé
   const {
@@ -532,6 +536,8 @@ export const EditServiceProductWizard = ({
       });
 
       invalidateCatalog();
+      invalidateProductEdit(productId, 'service-product-edit');
+      hydratedProductIdRef.current = null;
       onSuccess?.();
     } catch (error) {
       logger.error('Error updating service product', { error, productId });
@@ -545,7 +551,17 @@ export const EditServiceProductWizard = ({
     } finally {
       setIsSaving(false);
     }
-  }, [formData, productId, storeId, onSuccess, toast, invalidateCatalog, navigate, categoryTree]);
+  }, [
+    formData,
+    productId,
+    storeId,
+    onSuccess,
+    toast,
+    invalidateCatalog,
+    invalidateProductEdit,
+    navigate,
+    categoryTree,
+  ]);
 
   const handleNext = useCallback(async () => {
     const result = await validateStep(currentStep);

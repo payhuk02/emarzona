@@ -83,7 +83,10 @@ import {
   validatePhysicalWizardPublishSteps,
   validatePhysicalWizardStep,
 } from '@/lib/physical-wizard-step-validation';
-import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
+import {
+  useCatalogCacheInvalidation,
+  useProductEditCacheInvalidation,
+} from '@/hooks/useCatalogCacheInvalidation';
 import { useQuery } from '@tanstack/react-query';
 
 const PRODUCT_FIELDS =
@@ -412,6 +415,7 @@ export const EditPhysicalProductWizard = ({
   const physicalAccess = useStorePhysicalAccess(storeId);
   const { data: planLimits } = useStorePhysicalPlanLimits(storeId);
   const invalidateCatalog = useCatalogCacheInvalidation();
+  const invalidateProductEdit = useProductEditCacheInvalidation();
 
   // Load existing product with security validation and cache optimisé
   const {
@@ -820,6 +824,8 @@ export const EditPhysicalProductWizard = ({
       });
 
       invalidateCatalog();
+      invalidateProductEdit(productId, 'physical-product-edit');
+      hydratedProductIdRef.current = null;
       onSuccess?.();
     } catch (error) {
       logger.error('Error updating physical product', { error, productId });
@@ -842,6 +848,7 @@ export const EditPhysicalProductWizard = ({
     toast,
     user,
     invalidateCatalog,
+    invalidateProductEdit,
     planLimits,
   ]);
 

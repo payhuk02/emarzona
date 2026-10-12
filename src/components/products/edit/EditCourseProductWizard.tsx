@@ -54,7 +54,10 @@ import { assertUserCanManageProduct } from '@/lib/products/can-manage-product';
 import { triggerProductUpdatedWebhook } from '@/lib/products/trigger-product-updated-webhook';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { logger } from '@/lib/logger';
-import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
+import {
+  useCatalogCacheInvalidation,
+  useProductEditCacheInvalidation,
+} from '@/hooks/useCatalogCacheInvalidation';
 import { useQuery } from '@tanstack/react-query';
 import type { CourseSection, CourseLesson, CourseFormData } from '@/types/course-form';
 
@@ -350,6 +353,7 @@ export const EditCourseProductWizard = ({
       : { id: storeId, slug: hookStore?.slug }
     : null;
   const invalidateCatalog = useCatalogCacheInvalidation();
+  const invalidateProductEdit = useProductEditCacheInvalidation();
 
   // Load existing course with security validation and cache optimisé
   const {
@@ -535,8 +539,8 @@ export const EditCourseProductWizard = ({
           promotional_price: formData.promotional_price,
           currency: formData.currency || 'XOF',
           category: formData.category || null,
-          image_url: formData.image_url || '',
           images: formData.images || [],
+          image_url: (formData.images && formData.images[0]) || formData.image_url || '',
           meta_title: seoData.meta_title,
           meta_description: seoData.meta_description,
           meta_keywords: seoData.meta_keywords,
@@ -597,6 +601,8 @@ export const EditCourseProductWizard = ({
       });
 
       invalidateCatalog();
+      invalidateProductEdit(productId, 'course-product-edit');
+      hydratedProductIdRef.current = null;
       onSuccess?.();
     } catch (error) {
       logger.error('Error updating course product', { error, productId });
@@ -617,6 +623,7 @@ export const EditCourseProductWizard = ({
     faqs,
     affiliateData,
     pixelsData,
+    invalidateProductEdit,
     productId,
     storeId,
     onSuccess,

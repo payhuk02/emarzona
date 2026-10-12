@@ -67,7 +67,10 @@ import type {
   DigitalProductDownloadableFile,
   DigitalProductFAQ,
 } from '@/types/digital-product-form';
-import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
+import {
+  useCatalogCacheInvalidation,
+  useProductEditCacheInvalidation,
+} from '@/hooks/useCatalogCacheInvalidation';
 import { useQuery } from '@tanstack/react-query';
 
 const PRODUCT_FIELDS =
@@ -332,6 +335,7 @@ export const EditDigitalProductWizard = ({
       : { id: storeId, slug: hookStore?.slug }
     : null;
   const invalidateCatalog = useCatalogCacheInvalidation();
+  const invalidateProductEdit = useProductEditCacheInvalidation();
 
   // Load existing product with security validation and cache optimisé
   const {
@@ -613,8 +617,9 @@ export const EditDigitalProductWizard = ({
         promotional_price: formData.promotional_price,
         currency: formData.currency,
         pricing_model: formData.pricing_model || 'one-time',
-        image_url: formData.image_url || '',
+        // images[] is source of truth; keep image_url in sync for storefront cards
         images: formData.images || [],
+        image_url: (formData.images && formData.images[0]) || formData.image_url || '',
         meta_title: formData.seo?.meta_title,
         meta_description: formData.seo?.meta_description,
         og_image: formData.seo?.og_image,
@@ -707,6 +712,8 @@ export const EditDigitalProductWizard = ({
       });
 
       invalidateCatalog();
+      invalidateProductEdit(productId, 'digital-product-edit');
+      hydratedProductIdRef.current = null;
       onSuccess?.();
     } catch (error) {
       logger.error('Error updating digital product', { error, productId });
@@ -720,7 +727,7 @@ export const EditDigitalProductWizard = ({
     } finally {
       setIsSaving(false);
     }
-  }, [formData, productId, storeId, onSuccess, toast, invalidateCatalog]);
+  }, [formData, productId, storeId, onSuccess, toast, invalidateCatalog, invalidateProductEdit]);
 
   const handleNext = useCallback(async () => {
     const result = await validateStep(currentStep);

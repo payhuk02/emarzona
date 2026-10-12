@@ -568,11 +568,15 @@ export const DigitalBasicInfoForm = ({
           WebP ou JPEG, pour un rendu optimal sur la boutique et le marketplace.
         </p>
 
-        {/* Grille d'images existantes */}
+        {/* Grille d'images — `images[]` only (image_url synced on delete/upload/save) */}
         {(formData.images && formData.images.length > 0) || formData.image_url ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-            {/* Afficher les images du tableau images */}
-            {(formData.images || []).map((imageUrl: string, index: number) => (
+            {(formData.images && formData.images.length > 0
+              ? formData.images
+              : formData.image_url
+                ? [formData.image_url]
+                : []
+            ).map((imageUrl: string, index: number) => (
               <div key={imageUrl || `img-${index}`} className="relative group">
                 <img
                   src={imageUrl}
@@ -589,8 +593,14 @@ export const DigitalBasicInfoForm = ({
                   size="icon"
                   className="absolute top-1 right-1 h-9 w-9 sm:h-10 sm:w-10 rounded-full shadow-md touch-manipulation min-h-[36px] min-w-[36px] z-10"
                   onClick={() => {
-                    const currentImages = formDataRef.current.images || [];
-                    const newImages = currentImages.filter((_: string, i: number) => i !== index);
+                    const current = formDataRef.current;
+                    const list =
+                      current.images && current.images.length > 0
+                        ? current.images
+                        : current.image_url
+                          ? [current.image_url]
+                          : [];
+                    const newImages = list.filter((_: string, i: number) => i !== index);
                     updateFormData({
                       images: newImages,
                       image_url: newImages[0] || '',
@@ -603,35 +613,6 @@ export const DigitalBasicInfoForm = ({
                 </Button>
               </div>
             ))}
-
-            {/* Afficher image_url si elle existe et n'est pas dans images */}
-            {formData.image_url &&
-              (!formData.images || !formData.images.includes(formData.image_url)) && (
-                <div className="relative group">
-                  <img
-                    src={formData.image_url}
-                    alt="Preview produit"
-                    className="w-full h-32 object-cover rounded-lg border"
-                    loading="lazy"
-                    onError={e => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-1 right-1 h-9 w-9 sm:h-10 sm:w-10 rounded-full shadow-md touch-manipulation min-h-[36px] min-w-[36px] z-10"
-                    onClick={() => {
-                      updateFormData({ image_url: '' });
-                    }}
-                    disabled={uploadingImage}
-                    aria-label="Supprimer l'image du produit"
-                  >
-                    <X className="h-4 w-4" aria-hidden="true" />
-                  </Button>
-                </div>
-              )}
 
             {/* Zone d'ajout d'image */}
             <label
