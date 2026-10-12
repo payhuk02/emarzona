@@ -49,6 +49,8 @@ interface DigitalBasicInfoFormProps {
   formData: DigitalProductFormData;
   updateFormData: (updates: DigitalProductFormDataUpdater) => void;
   storeSlug: string;
+  /** Edit mode: gallery is written to DB on delete/upload (not only on wizard Save). */
+  galleryPersistsImmediately?: boolean;
 }
 
 // Utiliser les catégories centralisées pour les produits digitaux
@@ -58,6 +60,7 @@ export const DigitalBasicInfoForm = ({
   formData,
   updateFormData,
   storeSlug,
+  galleryPersistsImmediately = false,
 }: DigitalBasicInfoFormProps) => {
   const [slugChecking, setSlugChecking] = useState(false);
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
@@ -699,8 +702,12 @@ export const DigitalBasicInfoForm = ({
                 updateFormData(prev => appendProductGalleryImages(prev, validUrls));
 
                 toast({
-                  title: '✅ Images uploadées',
-                  description: `${validUrls.length} image(s) uploadée(s) avec succès`,
+                  title: galleryPersistsImmediately
+                    ? '✅ Images enregistrées'
+                    : '✅ Images uploadées',
+                  description: galleryPersistsImmediately
+                    ? `${validUrls.length} image(s) enregistrée(s) sur le produit`
+                    : `${validUrls.length} image(s) ajoutée(s) — enregistrez le produit pour publier`,
                 });
               }
             } catch (error) {

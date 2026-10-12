@@ -70,6 +70,7 @@ import { assertUserCanManageProduct } from '@/lib/products/can-manage-product';
 import { triggerProductUpdatedWebhook } from '@/lib/products/trigger-product-updated-webhook';
 import { persistProductWhatsApp } from '@/lib/products/persist-product-whatsapp';
 import { persistProductCountryOfOrigin } from '@/lib/products/persist-product-country';
+import { persistProductGallery } from '@/lib/products/persist-product-gallery';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -464,9 +465,25 @@ export const EditPhysicalProductWizard = ({
     productId,
   });
 
-  const handleUpdateFormData = useCallback((updates: PhysicalProductFormDataUpdate) => {
-    setFormData(prev => ({ ...prev, ...updates }));
-  }, []);
+  const handleUpdateFormData = useCallback(
+    (updates: PhysicalProductFormDataUpdate) => {
+      setFormData(prev => {
+        const next = { ...prev, ...updates };
+        if ('images' in updates && productId) {
+          const images = Array.isArray(next.images) ? next.images.filter(Boolean) : [];
+          const image_url = images[0] || '';
+          next.images = images;
+          void persistProductGallery({ productId, images, image_url })
+            .then(() => invalidateProductEdit(productId, 'physical-product-edit'))
+            .catch(err => {
+              logger.error('Physical gallery persist failed', { error: err, productId });
+            });
+        }
+        return next;
+      });
+    },
+    [productId, invalidateProductEdit]
+  );
 
   /**
    * Validate current step

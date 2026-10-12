@@ -9,6 +9,10 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import React from 'react';
 import { normalizeProductGallery } from '@/lib/products/product-gallery-images';
+import {
+  galleryFieldsChanged,
+  persistProductGallery,
+} from '@/lib/products/persist-product-gallery';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -408,10 +412,50 @@ export const EditDigitalProductWizard = ({
           newData.downloadable_files = resolved.downloadable_files;
         }
 
+        // Gallery: Storage upload alone does not update products row — persist now on edit
+        if ('images' in resolved || 'image_url' in resolved) {
+          const images = Array.isArray(newData.images) ? newData.images.filter(Boolean) : [];
+          const image_url = images[0] || '';
+          newData.images = images;
+          newData.image_url = image_url;
+
+          const oldPrimary = (Array.isArray(prev.images) && prev.images[0]) || prev.image_url || '';
+          if (prev.seo?.og_image && oldPrimary && prev.seo.og_image === oldPrimary) {
+            newData.seo = { ...(newData.seo || prev.seo), og_image: image_url };
+          }
+
+          if (productId && galleryFieldsChanged(prev, newData)) {
+            const ogPatch =
+              prev.seo?.og_image && oldPrimary && prev.seo.og_image === oldPrimary
+                ? image_url || null
+                : undefined;
+            void persistProductGallery({
+              productId,
+              images,
+              image_url,
+              og_image: ogPatch,
+            })
+              .then(() => {
+                invalidateProductEdit(productId, 'digital-product-edit');
+              })
+              .catch(err => {
+                logger.error('Gallery persist failed', { error: err, productId });
+                toast({
+                  title: 'Image non enregistrée',
+                  description:
+                    err instanceof Error
+                      ? err.message
+                      : 'Rechargez la page ou enregistrez le produit pour conserver les images.',
+                  variant: 'destructive',
+                });
+              });
+          }
+        }
+
         return newData;
       });
     },
-    []
+    [productId, invalidateProductEdit, toast]
   );
 
   /**
@@ -801,6 +845,7 @@ export const EditDigitalProductWizard = ({
             formData={formData as unknown as DigitalProductFormData}
             updateFormData={handleUpdateFormData}
             storeSlug={storeSlug || ''}
+            galleryPersistsImmediately
           />
         );
       case 2:

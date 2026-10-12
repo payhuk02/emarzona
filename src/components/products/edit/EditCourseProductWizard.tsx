@@ -9,6 +9,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import React from 'react';
 import { normalizeProductGallery } from '@/lib/products/product-gallery-images';
+import { persistProductGallery } from '@/lib/products/persist-product-gallery';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -426,12 +427,32 @@ export const EditCourseProductWizard = ({
     setPixelsData(courseData.pixelsData);
   }, [courseData, productId]);
 
-  const handleFieldChange = useCallback((field: string, value: unknown) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-  }, []);
+  const galleryPersistTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleFieldChange = useCallback(
+    (field: string, value: unknown) => {
+      setFormData(prev => {
+        const next = { ...prev, [field]: value };
+
+        if ((field === 'images' || field === 'image_url') && productId) {
+          if (galleryPersistTimerRef.current) clearTimeout(galleryPersistTimerRef.current);
+          galleryPersistTimerRef.current = setTimeout(() => {
+            const images = Array.isArray(next.images) ? next.images.filter(Boolean) : [];
+            const image_url =
+              field === 'images' ? images[0] || '' : String(next.image_url || images[0] || '');
+            void persistProductGallery({ productId, images, image_url })
+              .then(() => invalidateProductEdit(productId, 'course-product-edit'))
+              .catch(err => {
+                logger.error('Course gallery persist failed', { error: err, productId });
+              });
+          }, 400);
+        }
+
+        return next;
+      });
+    },
+    [productId, invalidateProductEdit]
+  );
 
   /**
    * Validate current step
