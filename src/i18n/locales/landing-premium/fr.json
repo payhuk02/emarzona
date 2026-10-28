@@ -307,7 +307,7 @@
           "Paiement à la livraison et garanties"
         ],
         "cta": "En savoir plus",
-        "imageAlt": "Boutique de produits physiques sur la plateforme Emarzona"
+        "imageAlt": "Équipe logistique et e-commerce préparant des commandes dans un atelier moderne Emarzona"
       },
       {
         "id": "digital",
@@ -319,7 +319,7 @@
           "Ebooks, logiciels, templates et plus"
         ],
         "cta": "En savoir plus",
-        "imageAlt": "Vente de produits digitaux sur la plateforme Emarzona"
+        "imageAlt": "Équipe d'entrepreneurs tech collaborant sur le tableau de bord de produits digitaux Emarzona"
       },
       {
         "id": "service",
@@ -331,7 +331,7 @@
           "Paiement en ligne avant ou après la séance"
         ],
         "cta": "En savoir plus",
-        "imageAlt": "Gestion de services et réservations sur Emarzona"
+        "imageAlt": "Consultante professionnelle en réunion stratégique et réservation de services sur Emarzona"
       },
       {
         "id": "courses",
@@ -343,7 +343,7 @@
           "Communauté et monétisation intégrées"
         ],
         "cta": "En savoir plus",
-        "imageAlt": "Plateforme de cours en ligne Emarzona"
+        "imageAlt": "Formatrice et équipe pédagogique enregistrant une masterclass en ligne sur Emarzona"
       },
       {
         "id": "artist",
@@ -355,7 +355,7 @@
           "Vitrine premium pour artistes et créateurs"
         ],
         "cta": "En savoir plus",
-        "imageAlt": "Galerie d'œuvres d'artiste sur Emarzona"
+        "imageAlt": "Artiste peintre et curatrice devant une œuvre avec certificat d'authenticité sur Emarzona"
       }
     ]
   },

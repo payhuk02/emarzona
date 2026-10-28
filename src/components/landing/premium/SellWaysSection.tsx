@@ -114,7 +114,7 @@ function SellWayBlock({
             sizes="(max-width: 1024px) 100vw, 50vw"
             decoding="async"
             data-no-mobile-opt
-            className="lp-sell-way-photo__img h-full w-full object-contain"
+            className="lp-sell-way-photo__img h-full w-full object-cover"
           />
         </picture>
       </div>
@@ -182,6 +182,19 @@ function SellWayBlock({
   );
 }
 
+const LEGACY_SELL_WAY_MARKERS = [
+  'landingSellWays.physical-xoexwwz',
+  'landingSellWays.digital-qtl2fcc',
+  'landingSellWays.service-vmyb97a',
+  'landingSellWays.courses-g7u2k1x',
+  'landingSellWays.artist-gk57o1i',
+];
+
+function isLegacySellWayUrl(url: string | undefined): boolean {
+  if (!url || typeof url !== 'string') return false;
+  return LEGACY_SELL_WAY_MARKERS.some(marker => url.includes(marker));
+}
+
 export function SellWaysSection() {
   const { t } = useLandingPremiumT();
   const { customizationData } = usePlatformCustomizationContext();
@@ -222,13 +235,16 @@ export function SellWaysSection() {
             items[index] ??
             ({ title: meta.id, desc: '' } satisfies SellWayItem);
 
+          const rawCustom = sellWayImages[meta.id];
+          const customImageUrl = isLegacySellWayUrl(rawCustom) ? undefined : rawCustom;
+
           return (
             <SellWayBlock
               key={meta.id}
               item={item}
               meta={meta}
               index={index}
-              customImageUrl={sellWayImages[meta.id]}
+              customImageUrl={customImageUrl}
             />
           );
         })}

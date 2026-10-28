@@ -43,6 +43,7 @@ export const clearAllLegacyLogoReferences = (): void => {
       'platform_logo_cache',
       'logo_cache',
       'customization_cache',
+      'platform-customization-public-cache',
     ];
 
     cacheKeys.forEach(key => {
@@ -50,8 +51,10 @@ export const clearAllLegacyLogoReferences = (): void => {
         const cached = localStorage.getItem(key);
         if (cached) {
           const parsed = JSON.parse(cached);
+          const raw = JSON.stringify(parsed).toLowerCase();
           const hasLegacyReference =
-            JSON.stringify(parsed).toLowerCase().includes('legacy') ||
+            raw.includes('legacy') ||
+            raw.includes('landingsellways.physical-xoexwwz') ||
             (parsed.light && parsed.light.toLowerCase().includes('legacy')) ||
             (parsed.dark && parsed.dark.toLowerCase().includes('legacy'));
 

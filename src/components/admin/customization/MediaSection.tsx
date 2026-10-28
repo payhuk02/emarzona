@@ -53,13 +53,29 @@ const NESTED_MEDIA_KEYS = new Set([
 
 const ACCEPTED_MEDIA_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
 
+const LEGACY_SELL_WAY_MARKERS = [
+  'landingSellWays.physical-xoexwwz',
+  'landingSellWays.digital-qtl2fcc',
+  'landingSellWays.service-vmyb97a',
+  'landingSellWays.courses-g7u2k1x',
+  'landingSellWays.artist-gk57o1i',
+];
+
 function getNestedMediaValue(
   media: Record<string, unknown>,
   group: string,
   key: string
 ): string | undefined {
   const nested = media[group] as Record<string, string> | undefined;
-  return nested?.[key];
+  const val = nested?.[key];
+  if (
+    group === 'landingSellWays' &&
+    typeof val === 'string' &&
+    LEGACY_SELL_WAY_MARKERS.some(m => val.includes(m))
+  ) {
+    return undefined;
+  }
+  return val;
 }
 
 export function MediaSection({ onChange }: MediaSectionProps) {
