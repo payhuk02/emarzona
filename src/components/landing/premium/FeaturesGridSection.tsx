@@ -38,12 +38,8 @@ type FeatureItem = { title: string; desc: string };
 function FeatureCard({ item, Icon }: { item: FeatureItem; Icon: LucideIcon }) {
   return (
     <article className="lp-feature-card lp-reveal-stagger__item group">
-      <div
-        className="lp-feature-card__glow pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-30 blur-3xl"
-        aria-hidden
-      />
-      <div className="lp-feature-card__icon relative">
-        <Icon className="lp-feature-card__svg" strokeWidth={1.5} aria-hidden />
+      <div className="lp-feature-card__icon relative mb-1">
+        <Icon className="lp-feature-card__svg text-black" strokeWidth={1.75} aria-hidden />
       </div>
       <h3 className="lp-feature-card__title relative">{item.title}</h3>
       <p className="lp-feature-card__desc relative">{item.desc}</p>
