@@ -1,5 +1,6 @@
 name: Lighthouse A11y Layouts
 
+# Pin ubuntu-24.04: ubuntu-latest (26.04+) is unsupported by Playwright 1.58.x browser installs.
 on:
   workflow_dispatch:
   schedule:
@@ -19,7 +20,7 @@ jobs:
   lighthouse-a11y:
     name: Lighthouse accessibility (layouts)
     timeout-minutes: 25
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code

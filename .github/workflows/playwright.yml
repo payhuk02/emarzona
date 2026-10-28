@@ -1,5 +1,6 @@
 name: Playwright Tests
 
+# Pin ubuntu-24.04: ubuntu-latest (26.04+) is unsupported by Playwright 1.58.x browser installs.
 on:
   workflow_dispatch:
   push:
@@ -10,7 +11,7 @@ on:
 jobs:
   test:
     timeout-minutes: 45
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -70,7 +71,7 @@ jobs:
   prepare-e2e-schema:
     name: Prepare shared E2E schema
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -90,7 +91,7 @@ jobs:
   test-commerce-type-gating:
     name: Commerce type gating E2E (5 types)
     timeout-minutes: 25
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: prepare-e2e-schema
 
     steps:
@@ -149,7 +150,7 @@ jobs:
   test-store-theme:
     name: Store create & theme E2E
     timeout-minutes: 25
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: prepare-e2e-schema
 
     steps:
@@ -202,7 +203,7 @@ jobs:
   test-artist-wizard:
     name: Product wizards publish E2E
     timeout-minutes: 35
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: prepare-e2e-schema
 
     steps:
@@ -256,7 +257,7 @@ jobs:
   test-vertical-paid:
     name: Vertical paid E2E (course + artist)
     timeout-minutes: 30
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: prepare-e2e-schema
 
     steps:
@@ -315,7 +316,7 @@ jobs:
   test-checkout-multi-psp:
     name: Checkout multi-PSP E2E
     timeout-minutes: 20
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -363,7 +364,7 @@ jobs:
 
   test-products:
     timeout-minutes: 25
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -398,7 +399,7 @@ jobs:
 
   test-auth:
     timeout-minutes: 15
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # ✅ ACTIVÉ: Les tests d'auth s'exécutent maintenant sur les PR aussi
     # if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
 
