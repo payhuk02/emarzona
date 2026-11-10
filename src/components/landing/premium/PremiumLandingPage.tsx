@@ -144,7 +144,7 @@ export function PremiumLandingPage() {
 
         <LandingDeferredSection minHeight="22rem" rootMargin="120px 0px">
           <ErrorBoundary level="section">
-            <Suspense fallback={<DeferredFallback minHeight="22rem" className="bg-[#08080a]" />}>
+            <Suspense fallback={<DeferredFallback minHeight="22rem" />}>
               <CountriesMarqueeSection />
             </Suspense>
           </ErrorBoundary>

@@ -13,7 +13,7 @@ export const landingCriticalCSS = `
   --lp-serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
   font-family:var(--lp-sans);
   color:#0f0f12;
-  background:#08080a;
+  background:#fafaf9;
   -webkit-font-smoothing:antialiased;
 }
 .landing-premium .lp-hero,

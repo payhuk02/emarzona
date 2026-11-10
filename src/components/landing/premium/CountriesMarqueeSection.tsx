@@ -12,10 +12,10 @@ function CountryChip({ code, regionKey }: { code: string; regionKey: string }) {
 
   return (
     <div
-      className="lp-country-chip mx-2 flex shrink-0 items-center gap-3 rounded-full border border-white/[0.12] bg-white/[0.07] px-4 py-2.5 sm:mx-3 sm:gap-3.5 sm:px-5 sm:py-3"
+      className="lp-country-chip mx-2 flex shrink-0 items-center gap-3 rounded-full border border-[var(--lp-text)]/10 bg-[var(--lp-surface)] px-4 py-2.5 shadow-sm sm:mx-3 sm:gap-3.5 sm:px-5 sm:py-3"
       title={name}
     >
-      <span className="lp-country-flag-wrap shrink-0 overflow-hidden rounded-md border border-white/15 shadow-sm">
+      <span className="lp-country-flag-wrap shrink-0 overflow-hidden rounded-md border border-[var(--lp-text)]/10 shadow-sm">
         <span
           className="lp-country-flag-img block h-7 w-10 sm:h-8 sm:w-[46px]"
           style={{ backgroundImage: `url(${flagSrc})` }}
@@ -24,10 +24,10 @@ function CountryChip({ code, regionKey }: { code: string; regionKey: string }) {
         />
       </span>
       <div className="min-w-0 pr-1">
-        <p className="whitespace-nowrap text-sm font-medium tracking-tight text-white/95 sm:text-[15px]">
+        <p className="whitespace-nowrap text-sm font-semibold tracking-tight text-[var(--lp-text)] sm:text-[15px]">
           {name}
         </p>
-        <p className="whitespace-nowrap text-xs uppercase tracking-[0.14em] text-white/40">
+        <p className="whitespace-nowrap text-xs uppercase tracking-[0.14em] text-[var(--lp-text-muted)]">
           {region}
         </p>
       </div>
@@ -75,29 +75,20 @@ export function CountriesMarqueeSection() {
     <section
       id="pays"
       ref={pauseRef}
-      className={`lp-countries-section relative overflow-hidden border-y border-white/[0.06] bg-[#08080a] py-14 sm:py-20 ${pauseClass}`}
+      className={`lp-countries-section lp-section-light relative overflow-hidden border-y border-[var(--lp-border-light)] bg-[var(--lp-surface)] py-14 sm:py-20 ${pauseClass}`}
     >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-80"
-        style={{
-          background:
-            'radial-gradient(ellipse 70% 55% at 50% 0%, rgba(37,99,235,0.14) 0%, transparent 55%), radial-gradient(ellipse 50% 40% at 80% 100%, rgba(201,162,39,0.08) 0%, transparent 50%)',
-        }}
-        aria-hidden
-      />
-
       <div className="relative">
         <div ref={ref} className={`lp-reveal ${className}`}>
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-5">
-            <p className="lp-eyebrow mx-auto mb-5">{t('countries.eyebrow')}</p>
-            <h2 className="lp-serif text-2xl text-white sm:text-3xl lg:text-4xl">
+            <p className="lp-eyebrow-light mx-auto mb-5">{t('countries.eyebrow')}</p>
+            <h2 className="lp-serif text-2xl text-[var(--lp-text)] sm:text-3xl lg:text-4xl">
               {t('countries.titleLine1')}
               <br />
               <span className="lp-gold-text italic">
                 {t('countries.titleHighlight', { count })}
               </span>
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[var(--lp-text-dim)] sm:text-base">
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[var(--lp-text-muted)] sm:text-base">
               {t('countries.subtitle')}
             </p>
           </div>

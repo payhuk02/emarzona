@@ -75,8 +75,19 @@
 
 .landing-premium:not(.app-premium) section h3.lp-serif,
 .landing-premium:not(.app-premium) .lp-feature-card__title,
-.landing-premium:not(.app-premium) .lp-sell-way-copy h3 {
-  font-weight: 700 !important;
+.landing-premium:not(.app-premium) .lp-sell-way-copy h3,
+.landing-premium:not(.app-premium) .lp-sell-way-title {
+  font-weight: 800 !important;
+}
+
+.landing-premium:not(.app-premium) .lp-sell-way-title {
+  text-transform: uppercase !important;
+  letter-spacing: 0.02em;
+  color: var(--lp-orange, #f97316) !important;
+}
+
+.landing-premium:not(.app-premium) .lp-sell-way-desc {
+  text-align: left !important;
 }
 
 .landing-premium:not(.app-premium) .lp-platform-hero__subtitle,

@@ -1099,6 +1099,22 @@
   }
 }
 
+.landing-premium .lp-sell-way-title {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--lp-orange, #f97316);
+}
+
+.landing-premium .lp-sell-way-desc {
+  align-self: stretch;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+  max-width: 36rem;
+  text-align: left;
+}
+
 .landing-premium .lp-sell-way-checks {
   align-self: stretch;
   margin-left: 0;
@@ -1228,14 +1244,14 @@
 
 .landing-premium .lp-feature-card__icon {
   display: flex !important;
-  height: 3rem;
-  width: 3rem;
+  height: 2.75rem;
+  width: 2.75rem;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  border-radius: 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--lp-text) 10%, transparent);
-  background: color-mix(in srgb, var(--lp-surface-muted, #f4f4f5) 88%, #ffffff);
+  border-radius: 0;
+  border: none;
+  background: transparent;
   color: #000000;
   opacity: 1 !important;
   visibility: visible !important;
@@ -1246,15 +1262,15 @@
 .landing-premium .lp-feature-card:hover .lp-feature-card__icon {
   transform: translateY(-2px);
   color: #000000;
-  background: color-mix(in srgb, var(--lp-surface-muted, #f4f4f5) 80%, #ffffff);
+  background: transparent;
 }
 
 .landing-premium .lp-feature-card__svg {
   display: block !important;
-  height: 1.85rem;
-  width: 1.85rem;
-  min-height: 1.85rem;
-  min-width: 1.85rem;
+  height: 2rem;
+  width: 2rem;
+  min-height: 2rem;
+  min-width: 2rem;
   color: #000000 !important;
   stroke: currentColor !important;
   opacity: 1 !important;
@@ -1263,15 +1279,15 @@
 
 @media (max-width: 639px) {
   .landing-premium .lp-feature-card__icon {
-    height: 3.25rem;
-    width: 3.25rem;
+    height: 3.75rem;
+    width: 3.75rem;
   }
 
   .landing-premium .lp-feature-card__svg {
-    height: 2rem;
-    width: 2rem;
-    min-height: 2rem;
-    min-width: 2rem;
+    height: 2.75rem;
+    width: 2.75rem;
+    min-height: 2.75rem;
+    min-width: 2.75rem;
   }
 }
 
@@ -1310,14 +1326,16 @@
   }
 
   .landing-premium .lp-feature-card__icon {
-    height: 3.15rem;
-    width: 3.15rem;
+    height: 3rem;
+    width: 3rem;
+    background: transparent;
+    border: none;
     color: #000000;
   }
 
   .landing-premium .lp-feature-card__svg {
-    height: 1.95rem;
-    width: 1.95rem;
+    height: 2.15rem;
+    width: 2.15rem;
     color: #000000 !important;
   }
 }
@@ -1935,6 +1953,8 @@
 /* Marquee pays & drapeaux */
 .landing-premium .lp-countries-section {
   isolation: isolate;
+  background: var(--lp-surface, #fafaf9) !important;
+  color: var(--lp-text, #0f0f12);
 }
 
 .landing-premium .lp-countries-marquee-mask {
@@ -1955,7 +1975,7 @@
   width: 2.5rem;
   height: 1.75rem;
   line-height: 0;
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--lp-surface-muted, #f4f4f5) 70%, #ffffff);
 }
 
 .landing-premium .lp-country-flag-img {
@@ -2001,9 +2021,9 @@
 
 .landing-premium .lp-country-chip:hover {
   transform: translateY(-2px);
-  border-color: rgba(59, 130, 246, 0.35);
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 28px -8px rgba(37, 99, 235, 0.25);
+  border-color: color-mix(in srgb, var(--lp-blue) 40%, transparent);
+  background: color-mix(in srgb, var(--lp-surface) 92%, #ffffff);
+  box-shadow: 0 8px 28px -8px rgba(37, 99, 235, 0.18);
 }
 
 @keyframes lp-countries-scroll {

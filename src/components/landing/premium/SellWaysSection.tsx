@@ -131,10 +131,10 @@ function SellWayBlock({
           strokeWidth={1.35}
         />
       </div>
-      <h3 className="lp-serif text-3xl text-[var(--lp-text)] sm:text-4xl lg:text-5xl">
+      <h3 className="lp-sell-way-title lp-serif text-3xl uppercase sm:text-4xl lg:text-5xl">
         {item.title}
       </h3>
-      <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--lp-text-muted)] sm:text-lg">
+      <p className="lp-sell-way-desc mt-4 w-full max-w-xl self-stretch text-left text-base leading-relaxed text-[var(--lp-text-muted)] sm:text-lg">
         {item.desc}
       </p>
       {bullets.length > 0 ? (
