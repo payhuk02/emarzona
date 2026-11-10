@@ -675,7 +675,7 @@ const ProductCardComponent = ({ product, storeSlug, storeSubdomain }: ProductCar
                 stockQuantity={extendedProduct.stock_quantity}
                 variant="outline"
                 size="sm"
-                className="flex-shrink-0 h-7"
+                className="flex-shrink-0 h-11 min-h-[44px] sm:h-8 sm:min-h-[44px]"
               />
             </div>
             {!extendedProduct.hide_purchase_count &&

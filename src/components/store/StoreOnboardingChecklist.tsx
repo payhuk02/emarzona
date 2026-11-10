@@ -25,7 +25,12 @@ function StepRow({ step }: { step: StoreOnboardingStep }) {
           )}
         </div>
         <p className="text-xs text-muted-foreground">{step.description}</p>
-        <Button variant="outline" size="sm" className="h-8 gap-1.5" asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-11 min-h-[44px] gap-1.5 sm:h-8 sm:min-h-[44px]"
+          asChild
+        >
           <Link to={step.href}>
             Commencer
             <ArrowRight className="h-3.5 w-3.5" aria-hidden />

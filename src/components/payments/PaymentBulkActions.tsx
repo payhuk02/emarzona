@@ -143,7 +143,13 @@ const PaymentBulkActions = ({
   if (selectedCount === 0) {
     return (
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" onSelect={handleSelectAll} className="h-8 w-8 p-0">
+        <Button
+          variant="ghost"
+          size="icon"
+          onSelect={handleSelectAll}
+          aria-label={isAllSelected ? 'Tout désélectionner' : 'Tout sélectionner'}
+          className="h-11 w-11 min-h-[44px] min-w-[44px] p-0 sm:h-8 sm:w-8"
+        >
           {isAllSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
         </Button>
         <span className="text-sm text-muted-foreground">Sélectionner tout</span>
@@ -155,7 +161,13 @@ const PaymentBulkActions = ({
     <>
       <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onSelect={handleSelectAll} className="h-6 w-6 p-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onSelect={handleSelectAll}
+            aria-label={isAllSelected ? 'Tout désélectionner' : 'Tout sélectionner'}
+            className="h-11 w-11 min-h-[44px] min-w-[44px] p-0 sm:h-8 sm:w-8"
+          >
             {isAllSelected ? (
               <CheckSquare className="h-4 w-4" />
             ) : isIndeterminate ? (

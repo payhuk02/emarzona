@@ -191,7 +191,7 @@ export function CommunityPostCard({
               size="sm"
               onClick={() => handleReaction('like')}
               disabled={toggleReaction.isPending}
-              className="min-h-[36px] sm:min-h-[40px]"
+              className="min-h-[44px]"
             >
               <ThumbsUp
                 className={cn(
@@ -206,14 +206,14 @@ export function CommunityPostCard({
               variant="ghost"
               size="sm"
               onClick={() => navigate(`/community/posts/${post.id}`)}
-              className="min-h-[36px] sm:min-h-[40px]"
+              className="min-h-[44px]"
             >
               <MessageCircle className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline">{post.comments_count || 0}</span>
               <span className="sm:hidden">{post.comments_count || 0}</span>
             </Button>
 
-            <Button variant="ghost" size="sm" className="min-h-[36px] sm:min-h-[40px]">
+            <Button variant="ghost" size="sm" className="min-h-[44px]">
               <Eye className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline">{post.views_count || 0}</span>
               <span className="sm:hidden">{post.views_count || 0}</span>

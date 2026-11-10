@@ -820,6 +820,15 @@
 }
 
 .landing-premium .lp-btn-primary,
+.landing-premium .lp-btn-gold,
+.landing-premium .lp-btn-outline,
+.landing-premium .lp-btn-outline-light,
+.landing-premium .lp-btn-outline-dark {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+.landing-premium .lp-btn-primary,
 .landing-premium .lp-btn-gold {
   background: linear-gradient(
     135deg,
@@ -2573,13 +2582,22 @@
   }
 }
 
-@media (max-width: 379px) {
+@media (max-width: 639px) {
   .landing-premium .lp-btn-primary,
   .landing-premium .lp-btn-gold,
   .landing-premium .lp-btn-outline,
-  .landing-premium .lp-btn-outline-light {
+  .landing-premium .lp-btn-outline-light,
+  .landing-premium .lp-btn-outline-dark {
     width: 100%;
     justify-content: center;
+  }
+
+  /* Groupes CTA : stack vertical sur mobile */
+  .landing-premium .lp-hero .flex.flex-wrap,
+  .landing-premium .lp-cta-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
   }
 }
 

@@ -115,8 +115,9 @@
     margin-bottom: var(--spacing-base);
   }
 
-  /* Links */
-  a {
+  /* Liens bouton uniquement — pas les liens texte inline */
+  a[role='button'],
+  a.button {
     font-size: var(--font-size-base);
     min-height: var(--touch-target-min);
     display: inline-flex;
@@ -133,15 +134,19 @@
     margin-right: auto;
   }
 
-  /* Prevent horizontal scroll */
-  * {
+  /* Empêche le débordement horizontal sans casser boutons / chips / flex */
+  img,
+  video,
+  iframe,
+  canvas,
+  svg,
+  table {
     max-width: 100%;
   }
 
   img,
   video,
   iframe {
-    max-width: 100%;
     height: auto;
   }
 
@@ -222,26 +227,24 @@
    ============================================ */
 
 @media (max-width: 767px) {
-  /* All interactive elements must be at least 44px */
+  /* Hauteur tactile 44px — pas de min-width global (casse les liens / chips / tabs) */
   button,
   a[role='button'],
   input[type='button'],
   input[type='submit'],
-  input[type='checkbox'],
-  input[type='radio'],
+  input[type='reset'],
   select,
   [role='button'],
   [role='tab'],
   [role='menuitem'] {
     min-height: var(--touch-target-min);
-    min-width: var(--touch-target-min);
-    padding: var(--spacing-sm) var(--spacing-base);
     font-size: var(--font-size-base); /* Prevents iOS zoom */
   }
 
   /* Icon-only buttons */
-  button[aria-label],
-  button:has(svg:only-child) {
+  button[aria-label]:not(:has(span:not(.sr-only))),
+  button:has(> svg:only-child),
+  a[role='button']:has(> svg:only-child) {
     min-width: var(--touch-target-min);
     min-height: var(--touch-target-min);
     padding: var(--spacing-sm);
@@ -259,7 +262,21 @@
   select {
     min-height: var(--touch-target-min);
     font-size: var(--font-size-base); /* Prevents iOS zoom */
-    padding: var(--spacing-sm) var(--spacing-base);
+  }
+
+  /* Empêche les overrides Tailwind h-7/h-8 de passer sous 44px sur mobile */
+  button.h-7,
+  button.h-8,
+  button.h-9,
+  button.min-h-\[36px\],
+  button.min-h-\[40px\] {
+    min-height: var(--touch-target-min) !important;
+  }
+
+  button.h-7.w-7,
+  button.h-8.w-8,
+  button.h-9.w-9 {
+    min-width: var(--touch-target-min) !important;
   }
 }
 

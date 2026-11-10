@@ -308,7 +308,11 @@ function ClaimCard({ claim, getStatusBadge, animationDelay = 0 }: ClaimCardProps
                 }).format(claim.total_cost)}
               </span>
             </div>
-            <Button variant="outline" size="sm" className="h-8">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-11 min-h-[44px] sm:h-8 sm:min-h-[44px]"
+            >
               <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
               <span className="text-xs sm:text-sm">Voir</span>
             </Button>

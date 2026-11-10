@@ -200,7 +200,7 @@ export default function WarehouseTransfers() {
     } = await supabase.auth.getUser();
     await updateStatus.mutateAsync({
       transferId,
-      status: newStatus as any,
+      status: newStatus as TransferStatus,
       userId: user?.id,
     });
   };
@@ -413,20 +413,19 @@ export default function WarehouseTransfers() {
                   </TableHeader>
                   <TableBody>
                     {filteredTransfers.map(transfer => {
-                      const status = TRANSFER_STATUSES.find(s => s.value === transfer.status);
                       return (
                         <TableRow key={transfer.id}>
                           <TableCell className="font-medium">{transfer.transfer_number}</TableCell>
                           <TableCell>
                             <span className="truncate block">
-                              {(transfer.from_warehouse as any)?.name || 'N/A'}
+                              {(transfer.from_warehouse as { name?: string } | null)?.name || 'N/A'}
                             </span>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <ArrowRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                               <span className="truncate">
-                                {(transfer.to_warehouse as any)?.name || 'N/A'}
+                                {(transfer.to_warehouse as { name?: string } | null)?.name || 'N/A'}
                               </span>
                             </div>
                           </TableCell>
@@ -469,7 +468,12 @@ export default function WarehouseTransfers() {
                             )}
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              aria-label="Voir le transfert"
+                              className="h-11 min-h-[44px] px-3 sm:h-8 sm:min-h-[44px]"
+                            >
                               Voir
                             </Button>
                           </TableCell>
@@ -670,12 +674,16 @@ function TransferCard({ transfer, status, onStatusUpdate, animationDelay = 0 }: 
         <div className="space-y-2 text-xs sm:text-sm">
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground min-w-[60px]">De:</span>
-            <span className="truncate">{(transfer.from_warehouse as any)?.name || 'N/A'}</span>
+            <span className="truncate">
+              {(transfer.from_warehouse as { name?: string } | null)?.name || 'N/A'}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
             <span className="text-muted-foreground min-w-[60px]">Vers:</span>
-            <span className="truncate">{(transfer.to_warehouse as any)?.name || 'N/A'}</span>
+            <span className="truncate">
+              {(transfer.to_warehouse as { name?: string } | null)?.name || 'N/A'}
+            </span>
           </div>
           {transfer.expected_delivery_date && (
             <div className="flex items-center gap-2 text-muted-foreground">
