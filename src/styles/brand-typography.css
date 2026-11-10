@@ -62,6 +62,10 @@
   letter-spacing: -0.02em;
 }
 
+.landing-premium .lp-platform-hero--carousel .lp-platform-hero__title {
+  font-weight: 900;
+}
+
 .landing-premium section h2.lp-serif,
 .landing-premium .mp-controls__title,
 .landing-premium .mp-quiz-banner h2,

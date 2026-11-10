@@ -37,9 +37,29 @@
   line-height: var(--lp-line-tight);
 }
 
-.landing-premium:not(.app-premium) .lp-platform-hero__title,
+.landing-premium:not(.app-premium)
+  .lp-platform-hero:not(.lp-platform-hero--carousel)
+  .lp-platform-hero__title,
 .landing-premium:not(.app-premium) .mp-hero__title {
   font-size: var(--lp-font-display) !important;
+}
+
+/* Carousel hero: taille / graisse dédiées (ne pas écraser avec --lp-font-display) */
+.landing-premium:not(.app-premium) .lp-platform-hero--carousel .lp-platform-hero__title {
+  font-weight: 900 !important;
+  font-size: clamp(2.35rem, 6.2vw, 9rem) !important;
+  color: #ffffff !important;
+}
+
+@media (min-width: 1024px) {
+  .landing-premium:not(.app-premium) .lp-platform-hero--carousel .lp-platform-hero__title {
+    font-size: clamp(4.25rem, 7.2vw, 9rem) !important;
+  }
+}
+
+.landing-premium:not(.app-premium) .lp-platform-hero--carousel .lp-platform-hero__subtitle {
+  font-weight: 700 !important;
+  color: #ffffff !important;
 }
 
 .landing-premium:not(.app-premium) .lp-hero h1.lp-serif {

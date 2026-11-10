@@ -142,8 +142,8 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
     icon: Home,
     elements: [
       // —— Style global ——
-      color('platformHero.titleColor', 'Couleur du titre', '#f97316'),
-      color('platformHero.subtitleColor', 'Couleur du sous-titre', '#0f0f12'),
+      color('platformHero.titleColor', 'Couleur du titre', '#ffffff'),
+      color('platformHero.subtitleColor', 'Couleur du sous-titre', '#ffffff'),
       color('platformHero.chipTextColor', 'Couleur des chips (verticales)', '#0f0f12'),
       color('platformHero.backgroundColor', 'Couleur de fond (fallback)', '#08080a', {
         clearable: true,
@@ -153,25 +153,25 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
       text(
         'platformHero.titleFontSizeMin',
         'Titre — taille min (mobile)',
-        '1.85',
-        'Nombre = rem (ex. 1.85). Ou valeur CSS : 2rem, 32px, clamp(…).'
+        '2.35',
+        'Nombre = rem (ex. 2.35). Ou valeur CSS : 2rem, 32px, clamp(…).'
       ),
       text(
         'platformHero.titleFontSizeMax',
         'Titre — taille max (desktop)',
-        '7.75',
+        '9',
         'Agrandir / diminuer le titre sur grand écran. Nombre = rem.'
       ),
       text(
         'platformHero.subtitleFontSizeMin',
         'Sous-titre — taille min (mobile)',
-        '1',
+        '1.05',
         'Nombre = rem. Ou valeur CSS complète.'
       ),
       text(
         'platformHero.subtitleFontSizeMax',
         'Sous-titre — taille max (desktop)',
-        '2.35',
+        '2.5',
         'Agrandir / diminuer le sous-titre sur desktop. Nombre = rem.'
       ),
       text(
@@ -180,7 +180,12 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
         '0.9375',
         'Taille des libellés des 5 verticales. Nombre = rem.'
       ),
-      text('platformHero.titleFontWeight', 'Titre — graisse', '800', 'Ex. 400, 600, 700, 800.'),
+      text(
+        'platformHero.titleFontWeight',
+        'Titre — graisse',
+        '900',
+        'Ex. 400, 600, 700, 800, 900.'
+      ),
       text(
         'platformHero.subtitleFontWeight',
         'Sous-titre — graisse',
