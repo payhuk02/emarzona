@@ -138,16 +138,16 @@ function SellWayBlock({
         {item.desc}
       </p>
       {bullets.length > 0 ? (
-        <ul className="mx-auto mt-6 w-fit max-w-full space-y-3 text-left">
+        <ul className="lp-sell-way-checks mt-6 w-full max-w-xl space-y-3 self-stretch text-left">
           {bullets.map(bullet => (
             <li
               key={bullet}
-              className="flex items-start gap-3 text-sm text-[var(--lp-text)] sm:text-[15px]"
+              className="lp-sell-way-checks__item flex items-start justify-start gap-3 text-left text-sm font-semibold text-[var(--lp-text)] sm:text-[15px]"
             >
               <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--lp-blue)]/12">
                 <Check className="h-3 w-3 text-[var(--lp-blue)]" strokeWidth={2.5} aria-hidden />
               </span>
-              {bullet}
+              <span className="min-w-0 flex-1 text-left">{bullet}</span>
             </li>
           ))}
         </ul>

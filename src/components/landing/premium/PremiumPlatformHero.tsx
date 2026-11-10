@@ -80,6 +80,8 @@ export function PremiumPlatformHero() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [textKey, setTextKey] = useState(0);
+  /** Indices d’images déjà chauffés — 0 seul au premier paint (LCP). */
+  const [warmedSlides, setWarmedSlides] = useState(() => new Set<number>([0]));
 
   const customMap =
     (customizationData?.media?.images?.landingPlatformHeroCarousel as
@@ -125,6 +127,44 @@ export function PremiumPlatformHero() {
     const timer = window.setInterval(next, SLIDE_INTERVAL_MS);
     return () => window.clearInterval(timer);
   }, [next, paused, reducedMotion, slideCount]);
+
+  // Après LCP : chauffe la slide suivante en idle ; ensuite active + suivante
+  useEffect(() => {
+    if (slideCount <= 1) return;
+
+    const warmPair = (from: number) => {
+      setWarmedSlides(prev => {
+        const nextIdx = (from + 1) % slideCount;
+        if (prev.has(from) && prev.has(nextIdx)) return prev;
+        const next = new Set(prev);
+        next.add(from);
+        next.add(nextIdx);
+        return next;
+      });
+    };
+
+    // Changement de slide : chauffer immédiatement la suivante
+    if (active !== 0) {
+      warmPair(active);
+      return;
+    }
+
+    // Premier paint : uniquement slide 0, puis idle pour #1
+    let idleId: number | undefined;
+    let timeoutId: number | undefined;
+    const warmNext = () => warmPair(0);
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      idleId = window.requestIdleCallback(warmNext, { timeout: 2200 });
+    } else {
+      timeoutId = window.setTimeout(warmNext, 900);
+    }
+    return () => {
+      if (idleId !== undefined && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
+  }, [active, slideCount]);
 
   const backgroundColor =
     getPageCustomizationValue(pageCustomization, 'platformHero.backgroundColor') ?? DEFAULT_BG;
@@ -190,10 +230,8 @@ export function PremiumPlatformHero() {
         <div className="lp-platform-hero__carousel absolute inset-0">
           {visibleSlides.map((slide, index) => {
             const isActive = index === active;
-            const prevIdx = (active - 1 + slideCount) % slideCount;
-            const nextIdx = (active + 1) % slideCount;
-            // Active + voisines pour crossfade fluide ; LCP = slide 0 eager
-            const mountImg = isActive || index === prevIdx || index === nextIdx || index === 0;
+            // LCP : slide 0 only; ensuite active + suivante préchauffée
+            const mountImg = warmedSlides.has(index) || isActive;
             return (
               <div
                 key={slide.key}

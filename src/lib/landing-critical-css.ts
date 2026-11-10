@@ -13,12 +13,21 @@ export const landingCriticalCSS = `
   --lp-serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
   font-family:var(--lp-sans);
   color:#0f0f12;
-  background:#fafaf9;
+  background:#08080a;
   -webkit-font-smoothing:antialiased;
 }
-.landing-premium .lp-hero {
+.landing-premium .lp-hero,
+.landing-premium .lp-platform-hero {
   background:#08080a;
   color:var(--lp-text-on-dark);
+  min-height:92svh;
+}
+.landing-premium .lp-platform-hero__title {
+  color:#fff;
+  font-weight:900;
+}
+.landing-premium .lp-platform-hero__subtitle {
+  color:#fff;
 }
 .landing-premium .lp-serif {
   font-family:var(--lp-serif);

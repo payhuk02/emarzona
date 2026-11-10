@@ -111,6 +111,29 @@ const Landing = () => {
   return <LandingContent hreflangAlternates={hreflangAlternates} />;
 };
 
+function useIdleSchemas() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let idleId: number | undefined;
+    let timeoutId: number | undefined;
+    const enable = () => setReady(true);
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      idleId = window.requestIdleCallback(enable, { timeout: 2500 });
+    } else {
+      timeoutId = window.setTimeout(enable, 800);
+    }
+    return () => {
+      if (idleId !== undefined && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
+  }, []);
+
+  return ready;
+}
+
 function LandingContent({
   hreflangAlternates,
 }: {
@@ -118,6 +141,7 @@ function LandingContent({
 }) {
   const { t } = useLandingPremiumT();
   const location = useLocation();
+  const schemasReady = useIdleSchemas();
   const langFromUrl = parseLandingLangFromSearch(location.search);
   const seo = resolveLandingPageSEO({
     langFromUrl,
@@ -137,9 +161,13 @@ function LandingContent({
         imageAlt={seo.imageAlt}
         hreflangAlternates={hreflangAlternates}
       />
-      <WebsiteSchema />
-      <OrganizationSchema />
-      <SoftwareApplicationSchema />
+      {schemasReady ? (
+        <>
+          <WebsiteSchema />
+          <OrganizationSchema />
+          <SoftwareApplicationSchema />
+        </>
+      ) : null}
       <PremiumLandingPage />
     </>
   );

@@ -19,6 +19,7 @@
 
   font-family: var(--lp-sans);
   font-size: var(--lp-font-body);
+  font-weight: 500;
   line-height: var(--lp-line-normal);
 }
 
@@ -69,14 +70,20 @@
 .landing-premium:not(.app-premium) section h2.lp-serif {
   font-family: var(--lp-serif) !important;
   font-size: var(--lp-font-h2) !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
+}
+
+.landing-premium:not(.app-premium) section h3.lp-serif,
+.landing-premium:not(.app-premium) .lp-feature-card__title,
+.landing-premium:not(.app-premium) .lp-sell-way-copy h3 {
+  font-weight: 700 !important;
 }
 
 .landing-premium:not(.app-premium) .lp-platform-hero__subtitle,
 .landing-premium:not(.app-premium) .mp-hero__subtitle,
 .landing-premium:not(.app-premium) .mp-hero__tagline {
   font-family: var(--lp-serif) !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
 }
 
 .landing-premium:not(.app-premium) p,
@@ -84,8 +91,14 @@
 .landing-premium:not(.app-premium) label,
 .landing-premium:not(.app-premium) .lp-footer-body {
   font-family: var(--lp-sans);
-  font-weight: 400;
+  font-weight: 500;
   line-height: var(--lp-line-normal);
+}
+
+.landing-premium:not(.app-premium) .lp-feature-card__desc,
+.landing-premium:not(.app-premium) .lp-sell-way-copy p,
+.landing-premium:not(.app-premium) .lp-sell-way-checks__item {
+  font-weight: 600 !important;
 }
 
 .landing-premium:not(.app-premium) [class*='text-xs'],
@@ -135,8 +148,12 @@
 .landing-premium:not(.app-premium) .lp-nav-link,
 .landing-premium:not(.app-premium) .lp-footer-col-title {
   font-family: var(--lp-sans);
-  font-weight: 600;
+  font-weight: 700;
   font-size: var(--lp-font-small);
+}
+
+.landing-premium:not(.app-premium) .lp-eyebrow-light {
+  font-weight: 700 !important;
 }
 
 .landing-premium:not(.app-premium) .lp-footer-newsletter input {

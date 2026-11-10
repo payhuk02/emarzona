@@ -14,7 +14,7 @@ type LandingDeferredSectionProps = {
 export function LandingDeferredSection({
   children,
   minHeight = '12rem',
-  rootMargin = '280px 0px',
+  rootMargin = '200px 0px',
 }: LandingDeferredSectionProps) {
   const ref = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
@@ -47,7 +47,7 @@ export function LandingDeferredSection({
   return (
     <section
       ref={ref}
-      className="lp-deferred-section"
+      className={`lp-deferred-section${visible ? ' is-mounted' : ''}`}
       style={{
         /* Garde la réserve pendant le lazy Suspense (évite collapse → CLS) */
         minHeight,
