@@ -87,11 +87,13 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
   /** Avis hors chemin LCP — idle après paint catalogue. */
   const reviewsIdleReady = useDeferredMount(Boolean(store?.id), 2800);
 
-  // Chrome LCP : URL brute = même src que StoreHeader <img> (pas de transform mismatch)
+  // Chrome LCP — aligné sur ce que StoreHeader affiche vraiment
   const storeHeroImage = getValue('heroImage') as string | undefined;
-  const storeBanner = (storeHeroImage || store?.banner_url || '').trim() || undefined;
+  /** Sous layout : uniquement banner_url (header). Hors layout / preview : heroImage OK. */
+  const headerBannerSrc = chromeFromLayout
+    ? (store?.banner_url || '').trim()
+    : (storeHeroImage || store?.banner_url || '').trim();
   const storeLogo = (store?.logo_url || '').trim() || undefined;
-  const storeChromeLcpSrc = storeBanner || storeLogo || '';
 
   // Utiliser un ID stable pour éviter les violations des règles des hooks
   const storeId = store?.id || null;
@@ -301,15 +303,23 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
     return buildProductImageUrl(resolved, 'grid', { quality: 82, resize: 'contain' });
   }, [filteredProducts, store?.placeholder_image_url, store?.watermark_url, store?.logo_url]);
 
-  // Bannière header = candidat LCP #1 ; catalogue seulement si pas de bannière
+  // Priorité LCP : bannière header > 1ʳᵉ image catalogue > logo (jamais logo avant catalogue).
+  const pageLcpSrc = headerBannerSrc
+    ? chromeFromLayout
+      ? '' // déjà préchargé par StorefrontAppLayout
+      : headerBannerSrc
+    : catalogLcpSrc || storeLogo || '';
+
   useLCPPreload({
-    src: storeChromeLcpSrc || catalogLcpSrc,
-    sizes: storeChromeLcpSrc
-      ? '100vw'
-      : catalogLcpSrc
-        ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
-        : undefined,
-    priority: !!(storeChromeLcpSrc || catalogLcpSrc),
+    src: pageLcpSrc,
+    sizes: pageLcpSrc
+      ? headerBannerSrc && !chromeFromLayout
+        ? '100vw'
+        : catalogLcpSrc && pageLcpSrc === catalogLcpSrc
+          ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+          : '128px'
+      : undefined,
+    priority: Boolean(pageLcpSrc),
   });
 
   const unifiedCatalog = useMemo(
@@ -653,7 +663,10 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
                         )}
 
                         <ProductGrid
-                          className={`store-product-grid ${productsLoading && hasLoadedOnce ? 'opacity-75 transition-opacity duration-300' : ''}`}
+                          className={cn(
+                            'store-product-grid transition-opacity duration-300',
+                            productsLoading && hasLoadedOnce && 'opacity-90'
+                          )}
                         >
                           {unifiedCatalog.map(({ id, unified }, index) => (
                             <div key={id} className="h-full min-w-0">

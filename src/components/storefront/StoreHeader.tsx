@@ -4,7 +4,6 @@ import { Check } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useStoreTheme } from '@/hooks/useStoreTheme';
 import { cn } from '@/lib/utils';
-import { resolveStoreProductPlaceholderUrl } from '@/lib/storefront/store-media-fallbacks';
 import { STORE_HERO_BANNER_CLASS } from '@/lib/storefront/store-hero-banner';
 
 interface StoreHeaderProps {
@@ -22,18 +21,14 @@ interface StoreHeaderProps {
   infoMessage?: React.ReactNode;
 }
 
-const LOGO_SIZE = 'h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 lg:h-28 lg:w-28 xl:h-32 xl:w-32';
+const LOGO_SIZE = 'h-14 w-14 sm:h-20 sm:w-20 md:h-24 md:w-24 lg:h-28 lg:w-28 xl:h-32 xl:w-32';
 
-const LOGO_OVERLAP = 'h-8 sm:h-10 md:h-12 lg:h-14 xl:h-16';
+const LOGO_OVERLAP = 'h-7 sm:h-10 md:h-12 lg:h-14 xl:h-16';
 
 const StoreHeader = ({ store }: StoreHeaderProps) => {
   const theme = useStoreTheme(store);
-  const bannerUrl = store.banner_url?.trim() || null;
-  const bannerFallbackUrl =
-    !bannerUrl && store.placeholder_image_url?.trim()
-      ? resolveStoreProductPlaceholderUrl(store)
-      : null;
-  const displayBannerUrl = bannerUrl || bannerFallbackUrl;
+  // Uniquement banner_url réel — jamais le placeholder produit (mauvais LCP + pas premium).
+  const displayBannerUrl = store.banner_url?.trim() || null;
 
   return (
     <header
@@ -59,28 +54,21 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
         >
           {displayBannerUrl ? (
             <>
-              <img
-                src={displayBannerUrl}
-                alt=""
-                role="presentation"
-                className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover blur-2xl opacity-50"
-                aria-hidden
-                loading="lazy"
-                decoding="async"
-                fetchPriority="low"
-              />
-              <div
-                className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-background/40"
-                aria-hidden
-              />
+              {/* absolute + contain : letterbox centré, pas de crop du design marketing */}
               <img
                 src={displayBannerUrl}
                 alt={`Bannière ${store.name}`}
-                className="relative z-10 mx-auto h-full w-full object-contain object-center"
+                className="absolute inset-0 z-10 h-full w-full object-contain object-center"
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
                 sizes="100vw"
+                width={1920}
+                height={640}
+              />
+              <div
+                className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/15 via-transparent to-background/35"
+                aria-hidden
               />
             </>
           ) : (
@@ -92,13 +80,17 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
             </div>
           )}
 
-          <div className="absolute top-3 right-3 z-30 sm:top-4 sm:right-4">
-            <LanguageSwitcher variant="outline" showLabel={false} />
+          <div className="absolute top-2 right-2 z-30 sm:top-4 sm:right-4">
+            <LanguageSwitcher
+              variant="outline"
+              showLabel={false}
+              buttonClassName="h-9 min-h-[44px] min-w-[44px] bg-background/80 backdrop-blur-sm border-border/60 shadow-sm touch-manipulation"
+            />
           </div>
         </div>
 
-        {/* Logo en dehors du conteneur overflow-hidden pour éviter le clipping */}
-        <div className="pointer-events-none absolute bottom-0 left-3 z-30 translate-y-1/2 sm:left-4 md:left-6 lg:left-8">
+        {/* Logo hors overflow-hidden pour éviter le clipping */}
+        <div className="pointer-events-none absolute bottom-0 left-2 z-30 translate-y-1/2 sm:left-4 md:left-6 lg:left-8">
           <div className="pointer-events-auto">
             {store.logo_url ? (
               <div className="relative group">
@@ -115,7 +107,9 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
                     className="h-full w-full object-cover"
                     loading="eager"
                     decoding="async"
-                    fetchPriority={displayBannerUrl ? 'low' : 'high'}
+                    fetchPriority="low"
+                    width={128}
+                    height={128}
                   />
                 </div>
                 {store.is_verified && (

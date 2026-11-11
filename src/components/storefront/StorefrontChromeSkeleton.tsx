@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { ProductGrid } from '@/components/ui/ProductGrid';
+import { STORE_HERO_BANNER_CLASS } from '@/lib/storefront/store-hero-banner';
 
 /**
  * Shell boutique immédiat (LCP) — remplace le spinner plein écran
@@ -79,8 +80,14 @@ export function StorefrontChromeSkeleton() {
       aria-label="Chargement de la boutique"
       data-testid="storefront-chrome-skeleton"
     >
-      <div className="h-16 border-b border-border/60 bg-muted/20" />
-      <div className="h-40 sm:h-52 w-full bg-gradient-to-br from-slate-800/80 via-slate-900/70 to-slate-950 animate-pulse" />
+      <div className="h-14 sm:h-16 border-b border-border/60 bg-muted/20" />
+      <div
+        className={cn(
+          'w-full bg-gradient-to-br from-slate-800/80 via-slate-900/70 to-slate-950 animate-pulse',
+          STORE_HERO_BANNER_CLASS
+        )}
+      />
+      <div className="h-7 sm:h-10 md:h-12" aria-hidden />
       <StorefrontContentSkeleton />
     </div>
   );

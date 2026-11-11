@@ -2,12 +2,16 @@
  * Spécifications bannière hero boutique (StoreHeader).
  * Hauteur effective = min(max(largeur ÷ ratio, minHeight), maxHeight).
  * 1rem = 16px (Tailwind par défaut).
+ *
+ * Mobile/tablette : ratios plus larges (≈2:1 → 2.4:1) pour les bannières
+ * marketing conçues en paysage — évite le letterbox excessif du 16:9
+ * avec object-contain sur des visuels type 3:1.
  */
 export const STORE_HERO_BANNER_SPECS = {
-  /** < 640px — 16:9, image entière visible (object-contain) */
-  base: { aspectRatio: 16 / 9, minPx: 176, maxPx: 240 },
+  /** < 640px — ~2:1, bannières paysage lisibles */
+  base: { aspectRatio: 2, minPx: 160, maxPx: 220 },
   /** ≥ 640px */
-  sm: { aspectRatio: 16 / 9, minPx: 200, maxPx: 320 },
+  sm: { aspectRatio: 2.2, minPx: 180, maxPx: 280 },
   /** ≥ 768px */
   md: { aspectRatio: 2.4, minPx: 200, maxPx: 360 },
   /** ≥ 1024px */
@@ -18,8 +22,8 @@ export const STORE_HERO_BANNER_SPECS = {
 
 /** Classes Tailwind appliquées au conteneur bannière. */
 export const STORE_HERO_BANNER_CLASS =
-  'aspect-[16/9] min-h-[11rem] max-h-[15rem] ' +
-  'sm:aspect-[16/9] sm:min-h-[12.5rem] sm:max-h-[20rem] ' +
+  'aspect-[2/1] min-h-[10rem] max-h-[13.75rem] ' +
+  'sm:aspect-[11/5] sm:min-h-[11.25rem] sm:max-h-[17.5rem] ' +
   'md:aspect-[12/5] md:min-h-[12.5rem] md:max-h-[22.5rem] ' +
   'lg:aspect-[14/5] lg:max-h-[26.25rem] ' +
   'xl:aspect-[3/1] xl:max-h-[30rem]';

@@ -596,6 +596,13 @@ export default async function middleware(req: Request): Promise<Response | undef
   }
 
   const url = new URL(req.url);
+  const requestHost = (req.headers.get('host') || url.hostname || '').toLowerCase().split(':')[0];
+
+  // Apex / www boutique → plateforme (évite SPA + boucles CDN sur myemarzona.shop)
+  if (requestHost === STORE_DOMAIN || requestHost === `www.${STORE_DOMAIN}`) {
+    const target = new URL(`${SITE}${url.pathname}${url.search}`);
+    return Response.redirect(target.toString(), 308);
+  }
 
   // P0-4 — Rate limit pages /auth (IP) ; SSO enterprise exclu
   if (isAuthRateLimitPath(url.pathname)) {

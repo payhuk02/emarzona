@@ -14,7 +14,9 @@ import { detectSubdomain, RESERVED_SUBDOMAINS } from '@/lib/subdomain-detector';
 import { logger } from '@/lib/logger';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { StoreNotFound } from './StoreNotFound';
+import { StoreDomainApexRedirect } from './StoreDomainApexRedirect';
 import { softNavigateTo } from '@/lib/navigation/soft-navigate';
+import { PLATFORM_ORIGIN } from '@/lib/auth-routes';
 import { Loader2 } from 'lucide-react';
 import { StorefrontChromeSkeleton } from '@/components/storefront/StorefrontChromeSkeleton';
 
@@ -63,12 +65,9 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
     }
   }, [store, subdomainInfo, setSelectedStoreId]);
 
-  // Rediriger l'apex myemarzona.shop vers emarzona.com
-  useEffect(() => {
-    if (subdomainInfo.isStoreDomain && !subdomainInfo.isSubdomain && !subdomainInfo.subdomain) {
-      softNavigateTo('https://www.emarzona.com');
-    }
-  }, [subdomainInfo]);
+  // Apex myemarzona.shop (ou www.myemarzona.shop → subdomain null) : pas de SPA plateforme
+  const isStoreApex =
+    subdomainInfo.isStoreDomain && !subdomainInfo.isSubdomain && !subdomainInfo.subdomain;
 
   // Bloquer les sous-domaines réservés → plateforme (jamais pendant le render)
   const isReservedSubdomain =
@@ -78,7 +77,7 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
 
   useEffect(() => {
     if (isReservedSubdomain) {
-      softNavigateTo('https://www.emarzona.com');
+      softNavigateTo(PLATFORM_ORIGIN);
     }
   }, [isReservedSubdomain]);
 
@@ -88,6 +87,10 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
     !isReservedSubdomain &&
     ((subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain && subdomainInfo.subdomain) ||
       (subdomainInfo.isCustomDomain && subdomainInfo.customDomain));
+
+  if (isStoreApex) {
+    return <StoreDomainApexRedirect />;
+  }
 
   // Sous-domaine réservé : écran neutre pendant la redirection
   if (isReservedSubdomain) {

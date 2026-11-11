@@ -7,9 +7,8 @@
  * Date: 1 Février 2025
  */
 
-import { Link } from 'react-router-dom';
-import { getPlatformLoginUrl, getPlatformUrl } from '@/lib/auth-routes';
-import { Store, AlertCircle, Home, Search } from 'lucide-react';
+import { getPlatformLoginUrl, getPlatformRegisterUrl, getPlatformUrl } from '@/lib/auth-routes';
+import { Store, AlertCircle, Home, Search, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -53,10 +52,10 @@ export function StoreNotFound({ subdomain, error }: StoreNotFoundProps) {
 
           <div className="flex flex-col gap-2 pt-4">
             <Button asChild className="w-full">
-              <Link to="/">
+              <a href={getPlatformUrl('/')}>
                 <Home className="mr-2 h-4 w-4" />
-                Retour à l'accueil
-              </Link>
+                Accueil Emarzona
+              </a>
             </Button>
             <Button asChild variant="outline" className="w-full">
               <a href={getPlatformUrl('/marketplace')}>
@@ -64,16 +63,18 @@ export function StoreNotFound({ subdomain, error }: StoreNotFoundProps) {
                 Explorer le marketplace
               </a>
             </Button>
-          </div>
-
-          <div className="pt-4 border-t text-center">
-            <p className="text-xs text-muted-foreground">
-              Vous êtes vendeur ?{' '}
-              <a href={getPlatformLoginUrl()} className="text-primary hover:underline">
-                Connectez-vous
-              </a>{' '}
-              pour créer votre boutique.
-            </p>
+            <Button asChild variant="outline" className="w-full">
+              <a href={getPlatformRegisterUrl()}>
+                <Store className="mr-2 h-4 w-4" />
+                Créer ma boutique
+              </a>
+            </Button>
+            <Button asChild variant="ghost" className="w-full">
+              <a href={getPlatformLoginUrl()}>
+                <LogIn className="mr-2 h-4 w-4" />
+                Connexion vendeur
+              </a>
+            </Button>
           </div>
         </CardContent>
       </Card>

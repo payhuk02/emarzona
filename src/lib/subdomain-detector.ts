@@ -84,8 +84,9 @@ export function detectSubdomain(): SubdomainInfo {
 
     if (hostname.endsWith(`.${storeDomain}`)) {
       let subdomain = hostname.replace(`.${storeDomain}`, '');
-      if (subdomain.startsWith('www.')) {
-        subdomain = subdomain.replace('www.', '');
+      // www.myemarzona.shop → apex (pas une boutique « www »)
+      if (subdomain === 'www' || subdomain.startsWith('www.')) {
+        subdomain = subdomain === 'www' ? '' : subdomain.replace(/^www\./, '');
       }
 
       return {

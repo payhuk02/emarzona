@@ -63,20 +63,16 @@
   color: rgba(148, 163, 184, 0.45);
 }
 
+/* Spinner SVG générique = sensation cheap sur cartes premium */
+.mp-product-cards-band .mp-product-card__image [role='status'] .animate-spin {
+  display: none !important;
+}
+
 /* Zoom image au hover = sensation cheap + jank GPU — lift carte suffit */
 .mp-product-cards-band .mp-product-card.group:hover .group-hover\:scale-110,
 .mp-product-cards-band .mp-product-card:hover .product-image,
 .mp-product-cards-band .mp-product-card:hover img:not([aria-hidden]) {
   transform: none !important;
-}
-
-@media (max-width: 768px) {
-  .mp-product-cards-band .mp-product-card__image img.product-image,
-  .mp-product-cards-band .mp-product-card__image .product-image {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-  }
 }
 
 .mp-product-cards-band .mp-product-card .border-gray-200,

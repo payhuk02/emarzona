@@ -14,6 +14,7 @@ import '@/styles/storefront-lite.css';
 import { useScrollRestoration } from '@/hooks/useScrollRestoration';
 import { useCurrentStoreBySubdomain } from '@/hooks/useStoreBySubdomain';
 import { useStoreTrustMetrics } from '@/hooks/useStoreTrustMetrics';
+import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { StorefrontShellProvider } from '@/contexts/StorefrontShellContext';
 import { shouldShowStoreChrome, shouldShowStoreHeader } from '@/lib/storefront/storefront-chrome';
 import type { Store as ThemedStore } from '@/hooks/useStores';
@@ -27,6 +28,15 @@ export function StorefrontAppLayout() {
   const storeTrust = useStoreTrustMetrics((store as ThemedStore) ?? null);
   const showChrome = shouldShowStoreChrome(location.pathname);
   const showHeader = shouldShowStoreHeader(location.pathname);
+
+  // Preload uniquement la bannière (vrai LCP). Le logo est petit + eager dans StoreHeader ;
+  // le précharger en high vole la bande passante au catalogue quand il n’y a pas de bannière.
+  const bannerLcpSrc = (store?.banner_url || '').trim();
+  useLCPPreload({
+    src: bannerLcpSrc,
+    sizes: '100vw',
+    priority: Boolean(bannerLcpSrc && showHeader),
+  });
 
   const shellValue = useMemo(
     () =>

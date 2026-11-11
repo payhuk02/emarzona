@@ -9,8 +9,10 @@ describe('store-hero-banner', () => {
     expect(resolveStoreHeroBannerHeightPx(280)).toBe(STORE_HERO_BANNER_SPECS.base.minPx);
   });
 
-  it('uses aspect ratio on typical mobile width', () => {
-    expect(resolveStoreHeroBannerHeightPx(390)).toBe(Math.round(390 / (16 / 9)));
+  it('uses wide aspect ratio on typical mobile width', () => {
+    expect(resolveStoreHeroBannerHeightPx(390)).toBe(
+      Math.round(390 / STORE_HERO_BANNER_SPECS.base.aspectRatio)
+    );
   });
 
   it('caps height on large desktop', () => {
@@ -19,5 +21,10 @@ describe('store-hero-banner', () => {
 
   it('scales at tablet breakpoint', () => {
     expect(resolveStoreHeroBannerHeightPx(768)).toBe(Math.round(768 / 2.4));
+  });
+
+  it('caps sm height when aspect would exceed maxPx', () => {
+    // 640 / 2.2 ≈ 291 → plafonné à sm.maxPx (280)
+    expect(resolveStoreHeroBannerHeightPx(640)).toBe(STORE_HERO_BANNER_SPECS.sm.maxPx);
   });
 });
