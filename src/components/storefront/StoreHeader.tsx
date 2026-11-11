@@ -54,11 +54,11 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
         >
           {displayBannerUrl ? (
             <>
-              {/* absolute + contain : letterbox centré, pas de crop du design marketing */}
+              {/* cover : remplit le cadre (plus de bandes haut/bas sur mobile) */}
               <img
                 src={displayBannerUrl}
                 alt={`Bannière ${store.name}`}
-                className="absolute inset-0 z-10 h-full w-full object-contain object-center"
+                className="absolute inset-0 z-10 h-full w-full object-cover object-center"
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
@@ -67,7 +67,7 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
                 height={640}
               />
               <div
-                className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/15 via-transparent to-background/35"
+                className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/10 via-transparent to-background/25"
                 aria-hidden
               />
             </>

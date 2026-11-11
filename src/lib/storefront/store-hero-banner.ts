@@ -3,29 +3,28 @@
  * Hauteur effective = min(max(largeur ÷ ratio, minHeight), maxHeight).
  * 1rem = 16px (Tailwind par défaut).
  *
- * Mobile/tablette : ratios plus larges (≈2:1 → 2.4:1) pour les bannières
- * marketing conçues en paysage — évite le letterbox excessif du 16:9
- * avec object-contain sur des visuels type 3:1.
+ * Ratios proches des bannières marketing paysage (~2.5:1 → 3:1) pour
+ * que object-cover remplisse le cadre sans letterbox mobile excessif.
  */
 export const STORE_HERO_BANNER_SPECS = {
-  /** < 640px — ~2:1, bannières paysage lisibles */
-  base: { aspectRatio: 2, minPx: 160, maxPx: 220 },
+  /** < 640px — ~2.5:1 */
+  base: { aspectRatio: 2.5, minPx: 140, maxPx: 200 },
   /** ≥ 640px */
-  sm: { aspectRatio: 2.2, minPx: 180, maxPx: 280 },
+  sm: { aspectRatio: 2.6, minPx: 160, maxPx: 240 },
   /** ≥ 768px */
-  md: { aspectRatio: 2.4, minPx: 200, maxPx: 360 },
+  md: { aspectRatio: 2.75, minPx: 180, maxPx: 320 },
   /** ≥ 1024px */
-  lg: { aspectRatio: 2.8, maxPx: 420 },
+  lg: { aspectRatio: 2.9, maxPx: 400 },
   /** ≥ 1280px */
   xl: { aspectRatio: 3, maxPx: 480 },
 } as const;
 
 /** Classes Tailwind appliquées au conteneur bannière. */
 export const STORE_HERO_BANNER_CLASS =
-  'aspect-[2/1] min-h-[10rem] max-h-[13.75rem] ' +
-  'sm:aspect-[11/5] sm:min-h-[11.25rem] sm:max-h-[17.5rem] ' +
-  'md:aspect-[12/5] md:min-h-[12.5rem] md:max-h-[22.5rem] ' +
-  'lg:aspect-[14/5] lg:max-h-[26.25rem] ' +
+  'aspect-[5/2] min-h-[8.75rem] max-h-[12.5rem] ' +
+  'sm:aspect-[13/5] sm:min-h-[10rem] sm:max-h-[15rem] ' +
+  'md:aspect-[11/4] md:min-h-[11.25rem] md:max-h-[20rem] ' +
+  'lg:aspect-[29/10] lg:max-h-[25rem] ' +
   'xl:aspect-[3/1] xl:max-h-[30rem]';
 
 /** Hauteur effective (px) pour une largeur viewport donnée. */

@@ -1,5 +1,5 @@
 /**
- * Tableau de bord premium — dégradé bleu ciel → blanc,
+ * Tableau de bord premium — fond neutre,
  * cartes blanches, brand orange/bleu Emarzona. Pas de glow orbs.
  */
 
@@ -27,27 +27,13 @@
 }
 
 .landing-premium.app-premium #main-content:has(.dashboard-premium) {
-  /* Dégradé premium vertical — bleu ciel doux → blanc */
-  background: linear-gradient(
-    180deg,
-    #d4f1f7 0%,
-    #e8f7fb 28%,
-    #f5fcfd 55%,
-    #ffffff 100%
-  ) !important;
-  background-attachment: fixed !important;
+  background: hsl(var(--background)) !important;
+  background-attachment: scroll !important;
 }
 
 .dark .landing-premium.app-premium #main-content:has(.dashboard-premium) {
-  /* Même dégradé (shell dashboard reste clair) */
-  background: linear-gradient(
-    180deg,
-    #d4f1f7 0%,
-    #e8f7fb 28%,
-    #f5fcfd 55%,
-    #ffffff 100%
-  ) !important;
-  background-attachment: fixed !important;
+  background: hsl(var(--background)) !important;
+  background-attachment: scroll !important;
 }
 
 /* Carte KPI */

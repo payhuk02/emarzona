@@ -20,11 +20,13 @@ describe('store-hero-banner', () => {
   });
 
   it('scales at tablet breakpoint', () => {
-    expect(resolveStoreHeroBannerHeightPx(768)).toBe(Math.round(768 / 2.4));
+    expect(resolveStoreHeroBannerHeightPx(768)).toBe(
+      Math.round(768 / STORE_HERO_BANNER_SPECS.md.aspectRatio)
+    );
   });
 
   it('caps sm height when aspect would exceed maxPx', () => {
-    // 640 / 2.2 ≈ 291 → plafonné à sm.maxPx (280)
+    // 640 / 2.6 ≈ 246 → plafonné à sm.maxPx (240)
     expect(resolveStoreHeroBannerHeightPx(640)).toBe(STORE_HERO_BANNER_SPECS.sm.maxPx);
   });
 });
