@@ -50,10 +50,11 @@ import { SEOMeta, ProductSchema, BreadcrumbSchema } from '@/components/seo';
 import { FAQSchema } from '@/components/seo/FAQSchema';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useNearDocumentBottom } from '@/hooks/useNearDocumentBottom';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
+import { ProductMobileBottomCta } from '@/components/products/ProductMobileBottomCta';
 import { formatPrice, calculateDiscount } from '@/lib/product-helpers';
 import { useToast } from '@/hooks/use-toast';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
@@ -71,31 +72,7 @@ import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
 import { STOREFRONT_STORE_PUBLIC_SELECT } from '@/lib/storefront/store-public-fields';
 import type { Store as ThemedStore } from '@/hooks/useStores';
 
-const ProductReviewsSummary = lazy(() =>
-  import('@/components/reviews/ProductReviewsSummary').then(m => ({
-    default: m.ProductReviewsSummary,
-  }))
-);
-const FrequentlyBoughtTogether = lazy(() =>
-  import('@/components/marketplace/ProductRecommendations').then(m => ({
-    default: m.FrequentlyBoughtTogether,
-  }))
-);
-const ProductRecommendations = lazy(() =>
-  import('@/components/marketplace/ProductRecommendations').then(m => ({
-    default: m.ProductRecommendations,
-  }))
-);
-const AIProductRecommendations = lazy(() =>
-  import('@/components/recommendations/AIProductRecommendations').then(m => ({
-    default: m.AIProductRecommendations,
-  }))
-);
 const StoreFooter = lazy(() => import('@/components/storefront/StoreFooter'));
-
-function BelowFoldSkeleton() {
-  return <Skeleton className="h-40 w-full rounded-lg mb-8" />;
-}
 
 /** Colonnes réelles sur `public.products` (alignées types Supabase). Pas de video_url / variants JSON sur cette table en prod. */
 const PRODUCT_DETAIL_COLUMNS =
@@ -178,7 +155,7 @@ const ProductDetails = () => {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { sentinelRef: bottomSentinelRef, nearBottom } = useNearDocumentBottom(product?.id);
 
   // ✅ PERFORMANCE: Preload image principale du produit (LCP critique)
   useEffect(() => {
@@ -520,7 +497,6 @@ const ProductDetails = () => {
   const headerRef = useScrollAnimation<HTMLElement>();
   const galleryRef = useScrollAnimation<HTMLDivElement>();
   const detailsRef = useScrollAnimation<HTMLDivElement>();
-  const reviewsRef = useScrollAnimation<HTMLDivElement>();
 
   const renderStars = (rating: number) => (
     <div className="flex items-center gap-1">
@@ -660,11 +636,12 @@ const ProductDetails = () => {
 
       <StoreThemeProvider store={chromeFromLayout ? null : (store as ThemedStore)}>
         <div
-          className={
+          className={cn(
             chromeFromLayout
               ? 'flex flex-col bg-background'
-              : 'min-h-screen flex flex-col bg-background store-theme-active'
-          }
+              : 'min-h-screen flex flex-col bg-background store-theme-active',
+            nearBottom && 'pb-20 md:pb-0'
+          )}
         >
           {/* Header — omis si chrome layout boutique (StoreHeader persistant) */}
           {!chromeFromLayout && (
@@ -1498,80 +1475,8 @@ const ProductDetails = () => {
                 </div>
               )}
 
-              {/* Reviews & Ratings */}
-              {product && (
-                <div
-                  ref={reviewsRef}
-                  className="mb-8 sm:mb-10 md:mb-12"
-                  role="region"
-                  aria-labelledby="reviews-heading"
-                >
-                  <h2 id="reviews-heading" className="sr-only">
-                    Avis et évaluations
-                  </h2>
-                  <Suspense fallback={<BelowFoldSkeleton />}>
-                    <ProductReviewsSummary
-                      productId={product.id}
-                      productType={product.product_type}
-                    />
-                  </Suspense>
-                </div>
-              )}
-
-              {/* Autres produits de la même boutique */}
-              {product && product.store_id && (
-                <div className="mb-8 sm:mb-10 md:mb-12">
-                  <Suspense fallback={<BelowFoldSkeleton />}>
-                    <FrequentlyBoughtTogether
-                      productId={product.id}
-                      storeId={product.store_id}
-                      storeName={store?.name}
-                      limit={4}
-                    />
-                  </Suspense>
-                </div>
-              )}
-
-              {/* Produits similaires - Recommandations intelligentes */}
-              {product && (
-                <div className="mb-8 sm:mb-10 md:mb-12">
-                  <Suspense fallback={<BelowFoldSkeleton />}>
-                    <ProductRecommendations
-                      productId={product.id}
-                      productCategory={product.category}
-                      limit={6}
-                      title="Produits similaires"
-                    />
-                  </Suspense>
-                </div>
-              )}
-
-              {/* Recommandations IA personnalisées */}
-              {product && (
-                <div className="mb-8 sm:mb-10 md:mb-12">
-                  <Suspense fallback={<BelowFoldSkeleton />}>
-                    <AIProductRecommendations
-                      userId={user?.id}
-                      currentProductId={product.id}
-                      category={product.category || undefined}
-                      productType={
-                        product.product_type as
-                          | 'digital'
-                          | 'physical'
-                          | 'service'
-                          | 'course'
-                          | 'artist'
-                          | undefined
-                      }
-                      sameTypeOnly={true} // Recommander le même type de produit pour cohérence
-                      title="Recommandé pour vous"
-                      limit={6}
-                      showReasoning={true}
-                      layout="grid"
-                    />
-                  </Suspense>
-                </div>
-              )}
+              {/* Sentinelle : CTA mobile s’affiche une fois le bas de page atteint */}
+              <div ref={bottomSentinelRef} className="h-px w-full" aria-hidden />
             </div>
           </main>
 
@@ -1595,6 +1500,23 @@ const ProductDetails = () => {
               />
             </Suspense>
           )}
+
+          <ProductMobileBottomCta
+            visible={nearBottom}
+            productName={product.name}
+            priceLabel={formatPrice(
+              selectedVariantPrice ?? displayPriceInfo?.price ?? product.price,
+              product.currency || 'FCFA'
+            )}
+            ctaLabel={
+              product.product_type === 'physical'
+                ? physicalBuyLabel
+                : getValue('productDetail.cta.buyNow') || 'Acheter maintenant'
+            }
+            loading={isPurchasing}
+            disabled={!product.is_active}
+            onBuy={handleBuyNow}
+          />
         </div>
       </StoreThemeProvider>
     </>
