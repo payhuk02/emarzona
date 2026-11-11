@@ -16,6 +16,7 @@ import { useStoreContext } from '@/contexts/StoreContext';
 import { StoreNotFound } from './StoreNotFound';
 import { softNavigateTo } from '@/lib/navigation/soft-navigate';
 import { Loader2 } from 'lucide-react';
+import { StorefrontChromeSkeleton } from '@/components/storefront/StorefrontChromeSkeleton';
 
 /** Hors app-core plateforme — StorefrontAppLayout / StoreHeader ne doivent pas grossir index-*.js. */
 const StoreSubdomainRoutes = lazy(() =>
@@ -104,14 +105,7 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
     // TanStack Query v5: isPending=true while no data yet (even before fetch starts).
     // Using isLoading alone allowed a render frame with store=undefined → crash on store.slug.
     if (isPending) {
-      return (
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="flex flex-col items-center space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-muted-foreground">Chargement de la boutique...</p>
-          </div>
-        </div>
-      );
+      return <StorefrontChromeSkeleton />;
     }
 
     // Store not found
@@ -136,16 +130,7 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
 
     // ✅ Store trouvée : afficher les routes de boutique au lieu des routes plateforme
     return (
-      <Suspense
-        fallback={
-          <div className="flex min-h-screen items-center justify-center">
-            <div className="flex flex-col items-center space-y-4">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">Chargement de la boutique...</p>
-            </div>
-          </div>
-        }
-      >
+      <Suspense fallback={<StorefrontChromeSkeleton />}>
         <StoreSubdomainRoutes storeSlug={storeSlug} />
       </Suspense>
     );

@@ -1,22 +1,43 @@
 /**
- * Composant qui injecte les scripts de tracking analytics pour une boutique
- * Utilise les configurations stockées dans la base de données
+ * Scripts analytics boutique — différés après idle + consentement cookies.
+ * Ne bloque pas le LCP (pixels tiers hors chemin critique).
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { PixelsInit } from '@/components/analytics/PixelsInit';
 import type { Store } from '@/hooks/useStores';
 import { logger } from '@/lib/logger';
+import { useDeferredMount } from '@/hooks/useDeferredMount';
+import {
+  COOKIE_CONSENT_UPDATED_EVENT,
+  getStoredCookiePreferences,
+  hasAnalyticsCookieConsent,
+  hasMarketingCookieConsent,
+} from '@/lib/cookie-consent';
+import type { CookiePreferences } from '@/types/legal';
 
 interface StoreAnalyticsScriptsProps {
   store: Store;
 }
 
 export const StoreAnalyticsScripts = ({ store }: StoreAnalyticsScriptsProps) => {
+  const idleReady = useDeferredMount(true, 2500);
+  const [prefs, setPrefs] = useState<Partial<CookiePreferences> | null>(() =>
+    getStoredCookiePreferences()
+  );
+
   useEffect(() => {
-    // IMPORTANT (sécurité):
-    // Ne jamais exécuter du HTML/JS arbitraire stocké en base en production.
-    // Cela ouvre une XSS persistante avec prise de contrôle complète du navigateur.
+    const refresh = () => setPrefs(getStoredCookiePreferences());
+    refresh();
+    window.addEventListener(COOKIE_CONSENT_UPDATED_EVENT, refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener(COOKIE_CONSENT_UPDATED_EVENT, refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+
+  useEffect(() => {
     const allowCustomScripts =
       import.meta.env.DEV && import.meta.env.VITE_ALLOW_CUSTOM_TRACKING_SCRIPTS === 'true';
 
@@ -29,9 +50,6 @@ export const StoreAnalyticsScripts = ({ store }: StoreAnalyticsScriptsProps) => 
       return;
     }
 
-    // Mode dev uniquement: fonctionnalité explicitement activée.
-    // Note: même en dev, éviter d’exécuter des scripts non maîtrisés.
-    // Ici on se contente d'injecter un marqueur texte pour faciliter le debug.
     if (store.custom_scripts_enabled && store.custom_tracking_scripts) {
       const marker = document.createElement('meta');
       marker.setAttribute('name', 'emarzona-custom-tracking-scripts');
@@ -43,25 +61,34 @@ export const StoreAnalyticsScripts = ({ store }: StoreAnalyticsScriptsProps) => 
     }
   }, [store]);
 
+  if (!idleReady) return null;
+
+  const allowAnalytics = hasAnalyticsCookieConsent(prefs);
+  const allowMarketing = hasMarketingCookieConsent(prefs);
+
+  if (!allowAnalytics && !allowMarketing) return null;
+
   return (
     <PixelsInit
       googleAnalyticsId={
-        store.google_analytics_enabled && store.google_analytics_id
+        allowAnalytics && store.google_analytics_enabled && store.google_analytics_id
           ? store.google_analytics_id
           : undefined
       }
       facebookPixelId={
-        store.facebook_pixel_enabled && store.facebook_pixel_id
+        allowMarketing && store.facebook_pixel_enabled && store.facebook_pixel_id
           ? store.facebook_pixel_id
           : undefined
       }
       googleTagManagerId={
-        store.google_tag_manager_enabled && store.google_tag_manager_id
+        allowAnalytics && store.google_tag_manager_enabled && store.google_tag_manager_id
           ? store.google_tag_manager_id
           : undefined
       }
       tiktokPixelId={
-        store.tiktok_pixel_enabled && store.tiktok_pixel_id ? store.tiktok_pixel_id : undefined
+        allowMarketing && store.tiktok_pixel_enabled && store.tiktok_pixel_id
+          ? store.tiktok_pixel_id
+          : undefined
       }
     />
   );

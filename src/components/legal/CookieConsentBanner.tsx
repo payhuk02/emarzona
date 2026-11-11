@@ -21,6 +21,7 @@ import {
   getStoredCookiePreferences,
   hasCookieConsentGiven,
   OPEN_COOKIE_SETTINGS_EVENT,
+  persistStoredCookiePreferences,
 } from '@/lib/cookie-consent';
 import type { CookiePreferences } from '@/types/legal';
 
@@ -91,7 +92,7 @@ export const CookieConsentBanner = () => {
         userId: user?.id,
         preferences: next,
       });
-      localStorage.setItem('cookieConsentGiven', 'true');
+      persistStoredCookiePreferences(next);
       setShowSettings(false);
       setShowBanner(false);
     } finally {

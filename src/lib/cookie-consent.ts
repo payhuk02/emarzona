@@ -31,6 +31,12 @@ function getCookie(name: string): string | null {
 }
 
 export const OPEN_COOKIE_SETTINGS_EVENT = 'emarzona:open-cookie-settings';
+export const COOKIE_CONSENT_UPDATED_EVENT = 'emarzona:cookie-consent-updated';
+
+export function notifyCookieConsentUpdated(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_UPDATED_EVENT));
+}
 
 export function hasCookieConsentGiven(): boolean {
   // Check cookie first (new), then fall back to localStorage (legacy migration)
@@ -72,6 +78,18 @@ export function getStoredCookiePreferences(): Partial<CookiePreferences> | null 
   return null;
 }
 
+/** Persiste consent + prefs (cookie + localStorage) et notifie les listeners (pixels, Crisp…). */
+export function persistStoredCookiePreferences(preferences: Partial<CookiePreferences>): void {
+  const serialized = JSON.stringify(preferences);
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('cookieConsentGiven', 'true');
+    localStorage.setItem('cookiePreferences', serialized);
+  }
+  setCookie(CONSENT_COOKIE, 'true');
+  setCookie(PREFS_COOKIE, serialized);
+  notifyCookieConsentUpdated();
+}
+
 export function openCookieSettings(): void {
   if (typeof window === 'undefined') return;
   window.dispatchEvent(new CustomEvent(OPEN_COOKIE_SETTINGS_EVENT));
@@ -89,4 +107,11 @@ export function hasAnalyticsCookieConsent(
 ): boolean {
   if (!hasCookieConsentGiven()) return false;
   return preferences?.analytics === true;
+}
+
+export function hasMarketingCookieConsent(
+  preferences?: Partial<CookiePreferences> | null
+): boolean {
+  if (!hasCookieConsentGiven()) return false;
+  return preferences?.marketing === true;
 }

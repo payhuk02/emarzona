@@ -9,10 +9,12 @@ import UnifiedProductCard from '@/components/products/UnifiedProductCard';
 import { transformToUnifiedProduct } from '@/lib/product-transform';
 import ProductFilters from '@/components/storefront/ProductFilters';
 import StoreFooter from '@/components/storefront/StoreFooter';
-import ContactForm from '@/components/storefront/ContactForm';
-import ReviewsList from '@/components/storefront/ReviewsList';
-import { StoreMarketingSections } from '@/components/storefront/StoreMarketingSections';
-import { StoreLocationSection } from '@/components/storefront/StoreLocationSection';
+import {
+  DeferredContactForm,
+  DeferredReviewsList,
+  DeferredStoreMarketing,
+  DeferredStoreLocationSection,
+} from '@/components/storefront/StorefrontDeferredSections';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { ShoppingCart, AlertCircle, ArrowRight } from 'lucide-react';
@@ -24,8 +26,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useToast } from '@/hooks/use-toast';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
-import '@/styles/landing-premium.css';
-import '@/styles/marketplace-premium.css';
+import '@/styles/storefront-lite.css';
 import { StoreAnalyticsScripts } from '@/components/storefront/StoreAnalyticsScripts';
 import { MarketplaceFavoritesProvider } from '@/contexts/MarketplaceFavoritesContext';
 import type { Store } from '@/hooks/useStores';
@@ -570,7 +571,7 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
                     />
 
                     {filteredProducts.length > 0 ? (
-                      <div ref={productsRef} className="landing-premium mp-product-cards-band">
+                      <div ref={productsRef} className="mp-product-cards-band">
                         {/* Indicateur de chargement discret en haut si rechargement */}
                         {productsLoading && hasLoadedOnce && (
                           <div className="flex justify-center mb-4">
@@ -685,7 +686,7 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
                       {/* Contenu marketing */}
                       {/* Contenu marketing - Chargement adaptatif */}
                       {store.marketing_content && !isLowBandwidth && (
-                        <StoreMarketingSections
+                        <DeferredStoreMarketing
                           marketingContent={store.marketing_content}
                           store={store}
                         />
@@ -727,7 +728,7 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
                   store ? (
                     // Chargement adaptatif des avis
                     !isLowBandwidth ? (
-                      <ReviewsList
+                      <DeferredReviewsList
                         reviews={reviews}
                         loading={reviewsLoading}
                         storeSlug={store.slug}
@@ -742,9 +743,9 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
                 contactContent={
                   store ? (
                     <div className="space-y-6">
-                      {showLocationSection && <StoreLocationSection store={store} />}
+                      {showLocationSection && <DeferredStoreLocationSection store={store} />}
 
-                      <ContactForm
+                      <DeferredContactForm
                         storeName={store.name}
                         contactEmail={store.contact_email || undefined}
                         contactPhone={store.contact_phone || undefined}
