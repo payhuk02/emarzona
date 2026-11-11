@@ -429,7 +429,9 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
           : 'bg-transparent border border-gray-200 dark:border-gray-700',
         'rounded-xl overflow-hidden',
         'min-h-[480px] sm:min-h-[520px] lg:min-h-[560px]',
-        'hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer',
+        isPremiumCard
+          ? 'cursor-pointer'
+          : 'hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer',
         (product.is_sponsored || product.is_featured) && 'border-primary border-2',
         className
       )}

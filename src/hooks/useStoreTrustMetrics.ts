@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { resolveStorePublicTrust } from '@/lib/commerce/store-public-trust';
 import type { Store } from '@/hooks/useStores';
+import { useDeferredMount } from '@/hooks/useDeferredMount';
 
 export function useStoreTrustMetrics(
   store:
@@ -12,10 +13,12 @@ export function useStoreTrustMetrics(
 ) {
   const storeId = store?.id ?? null;
   const hasStoredClients = typeof store?.active_clients === 'number' && store.active_clients > 0;
+  /** Hors chemin LCP catalogue — la requête orders peut être lourde. */
+  const idleReady = useDeferredMount(Boolean(storeId) && !hasStoredClients, 3200);
 
   const customersQuery = useQuery({
     queryKey: ['store-active-clients', storeId],
-    enabled: Boolean(storeId) && !hasStoredClients,
+    enabled: Boolean(storeId) && !hasStoredClients && idleReady,
     staleTime: 10 * 60 * 1000,
     queryFn: async () => {
       if (!storeId) return 0;

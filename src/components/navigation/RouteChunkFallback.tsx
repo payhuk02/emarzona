@@ -42,8 +42,15 @@ export function OutletChunkFallback() {
 }
 
 /** Isole le lazy page pour ne pas démonter le layout / les guards parents. */
-export function RouteOutletSuspense({ children }: { children: ReactNode }) {
-  return <Suspense fallback={<OutletChunkFallback />}>{children}</Suspense>;
+export function RouteOutletSuspense({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  /** Override du skeleton contenu (ex. boutique premium). */
+  fallback?: ReactNode;
+}) {
+  return <Suspense fallback={fallback ?? <OutletChunkFallback />}>{children}</Suspense>;
 }
 
 function DashboardRouteSkeleton() {

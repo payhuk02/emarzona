@@ -15,14 +15,17 @@ import {
   DeferredStoreMarketing,
   DeferredStoreLocationSection,
 } from '@/components/storefront/StorefrontDeferredSections';
-import { Skeleton } from '@/components/ui/skeleton';
+import {
+  StorefrontChromeSkeleton,
+  StorefrontContentSkeleton,
+  StorefrontProductGridSkeleton,
+} from '@/components/storefront/StorefrontChromeSkeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { ShoppingCart, AlertCircle, ArrowRight } from 'lucide-react';
 import { ProductGrid } from '@/components/ui/ProductGrid';
 import { Button } from '@/components/ui/button';
 import { SEOMeta, StoreSchema, BreadcrumbSchema, ItemListSchema } from '@/components/seo';
 import { logger } from '@/lib/logger';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useToast } from '@/hooks/use-toast';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
@@ -32,6 +35,7 @@ import { MarketplaceFavoritesProvider } from '@/contexts/MarketplaceFavoritesCon
 import type { Store } from '@/hooks/useStores';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { useAdaptiveLoading } from '@/hooks/useAdaptiveLoading';
+import { useDeferredMount } from '@/hooks/useDeferredMount';
 import { useStoreSlug } from '@/contexts/StoreSlugContext';
 import { useStorefrontShell } from '@/contexts/StorefrontShellContext';
 import { generateStoreUrl, generateStorefrontItemUrl } from '@/lib/store-utils';
@@ -47,6 +51,7 @@ import { filterStorefrontProducts } from '@/lib/commerce/storefront-catalog';
 import { useStorefrontReviews } from '@/hooks/useStorefrontReviews';
 import { useStoreTrustMetrics } from '@/hooks/useStoreTrustMetrics';
 import { STOREFRONT_STORE_PUBLIC_SELECT } from '@/lib/storefront/store-public-fields';
+import { resolveStoreProductImageUrl } from '@/lib/storefront/store-media-fallbacks';
 
 export type StorefrontProps = {
   /** Mode prévisualisation vendeur (pas d’analytics / SEO indexable). */
@@ -55,18 +60,22 @@ export type StorefrontProps = {
   storeOverride?: Store | null;
 };
 
+/** Première rangée desktop (~3 cols) + 1 mobile — eager / fetchpriority high. */
+const LCP_IMAGE_PRIORITY_COUNT = 4;
+
 const StorefrontPage = ({ previewMode = false, storeOverride = null }: StorefrontProps = {}) => {
   const { slug: paramSlug } = useParams<{ slug: string }>();
   const contextSlug = useStoreSlug();
   const slug = paramSlug || contextSlug;
   const storefrontShell = useStorefrontShell();
   const chromeFromLayout = Boolean(storefrontShell?.chromeProvided) && !previewMode;
+  const shellStore = !previewMode ? (storefrontShell?.store ?? null) : null;
   const { getValue } = usePageCustomization('storefront');
   const navigate = useNavigate();
-  const [store, setStore] = useState<Store | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [store, setStore] = useState<Store | null>(() => storeOverride ?? shellStore);
+  const [loading, setLoading] = useState(() => !(storeOverride || shellStore));
   const [error, setError] = useState<string | null>(null);
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false); // Pour savoir si on a déjà chargé une fois
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(() => Boolean(storeOverride || shellStore));
   const [searchQuery, setSearchQuery] = useState('');
   const [category, setCategory] = useState('all');
   const [productType, setProductType] = useState('all');
@@ -75,25 +84,14 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
   );
   const { toast } = useToast();
   const { isLowBandwidth } = useAdaptiveLoading();
+  /** Avis hors chemin LCP — idle après paint catalogue. */
+  const reviewsIdleReady = useDeferredMount(Boolean(store?.id), 2800);
 
-  // ✅ PERFORMANCE: Preload image hero du store ou logo (potentielle LCP)
+  // Chrome LCP : URL brute = même src que StoreHeader <img> (pas de transform mismatch)
   const storeHeroImage = getValue('heroImage') as string | undefined;
-  const storeLogo = store?.logo_url || undefined;
-  const storeLcpRaw = storeHeroImage || storeLogo || '';
-  const storeLcpSrc = storeLcpRaw
-    ? buildProductImageUrl(storeLcpRaw, storeHeroImage ? 'hero' : 'thumbnail', {
-        quality: storeHeroImage ? 72 : 85,
-      })
-    : '';
-
-  useLCPPreload({
-    src: storeLcpSrc,
-    sizes:
-      storeHeroImage || storeLogo
-        ? '(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px'
-        : undefined,
-    priority: !!storeLcpSrc,
-  });
+  const storeBanner = (storeHeroImage || store?.banner_url || '').trim() || undefined;
+  const storeLogo = (store?.logo_url || '').trim() || undefined;
+  const storeChromeLcpSrc = storeBanner || storeLogo || '';
 
   // Utiliser un ID stable pour éviter les violations des règles des hooks
   const storeId = store?.id || null;
@@ -113,7 +111,9 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
     [products, storefrontCommerceType, storeMetadata]
   );
   const showLocationSection = showStoreLocationInContact(storefrontCommerceType);
-  const { data: reviews = [], isLoading: reviewsLoading } = useStorefrontReviews(storeId);
+  const { data: reviews = [], isLoading: reviewsLoading } = useStorefrontReviews(
+    reviewsIdleReady ? storeId : null
+  );
   const storeTrust = useStoreTrustMetrics(store);
 
   const fetchStore = useCallback(async () => {
@@ -235,8 +235,44 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
       setHasLoadedOnce(true);
       return;
     }
+
+    // Shell boutique déjà résolu (même cache RQ) — pas de 2ᵉ fetch ni flash skeleton.
+    if (chromeFromLayout) {
+      if (shellStore) {
+        setStore(shellStore);
+        setLoading(false);
+        setError(null);
+        setHasLoadedOnce(true);
+        return;
+      }
+      if (storefrontShell?.storeLoading) {
+        setLoading(true);
+        return;
+      }
+    }
+
     fetchStore();
-  }, [fetchStore, storeOverride]);
+  }, [fetchStore, storeOverride, chromeFromLayout, shellStore, storefrontShell?.storeLoading]);
+
+  // Prefetch onglets below-fold après paint catalogue (switch d’onglet instantané).
+  useEffect(() => {
+    if (!store?.id || productsLoading) return;
+
+    const warm = () => {
+      void import('@/components/storefront/ContactForm');
+      void import('@/components/storefront/ReviewsList');
+      void import('@/components/storefront/StoreMarketingSections');
+      void import('@/components/storefront/StoreLocationSection');
+    };
+
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(warm, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+
+    const timer = window.setTimeout(warm, 1200);
+    return () => window.clearTimeout(timer);
+  }, [store?.id, productsLoading]);
 
   const filteredProducts = useMemo(
     () =>
@@ -251,6 +287,60 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
         return matchesSearch && matchesCategory && matchesType && matchesLicense;
       }),
     [catalogProducts, searchQuery, category, productType, licensingType]
+  );
+
+  // Preload = même URL que ResponsiveProductImage (store: grid + contain + q82)
+  const catalogLcpSrc = useMemo(() => {
+    const first = filteredProducts[0] as { image_url?: string | null } | undefined;
+    const resolved = resolveStoreProductImageUrl(first?.image_url, {
+      placeholder_image_url: store?.placeholder_image_url,
+      watermark_url: store?.watermark_url,
+      logo_url: store?.logo_url,
+    });
+    if (!resolved || resolved.startsWith('/')) return '';
+    return buildProductImageUrl(resolved, 'grid', { quality: 82, resize: 'contain' });
+  }, [filteredProducts, store?.placeholder_image_url, store?.watermark_url, store?.logo_url]);
+
+  // Bannière header = candidat LCP #1 ; catalogue seulement si pas de bannière
+  useLCPPreload({
+    src: storeChromeLcpSrc || catalogLcpSrc,
+    sizes: storeChromeLcpSrc
+      ? '100vw'
+      : catalogLcpSrc
+        ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+        : undefined,
+    priority: !!(storeChromeLcpSrc || catalogLcpSrc),
+  });
+
+  const unifiedCatalog = useMemo(
+    () =>
+      filteredProducts.map(product => {
+        const productWithExtras = product as {
+          description?: string | null;
+          short_description?: string;
+          promotional_price?: number;
+          image_url?: string | null;
+        };
+        return {
+          id: product.id,
+          unified: transformToUnifiedProduct({
+            ...product,
+            description: productWithExtras.description ?? undefined,
+            short_description: productWithExtras.short_description ?? undefined,
+            promotional_price: productWithExtras.promotional_price ?? undefined,
+            image_url: productWithExtras.image_url ?? undefined,
+            stores: store
+              ? {
+                  id: store.id,
+                  name: store.name,
+                  slug: store.slug,
+                  logo_url: store.logo_url ?? undefined,
+                }
+              : undefined,
+          } as Parameters<typeof transformToUnifiedProduct>[0]),
+        };
+      }),
+    [filteredProducts, store]
   );
 
   const categories = useMemo(
@@ -336,17 +426,14 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
     });
   }, [store, filteredProducts]);
 
-  // Animations au scroll
-  const headerRef = useScrollAnimation<HTMLElement>();
-  const productsRef = useScrollAnimation<HTMLDivElement>();
-
   // Handler pour l'achat - Redirige vers checkout (utilisé par UnifiedProductCard)
   const handleBuyProduct = useCallback(
     async (
       action: 'view' | 'buy' | 'favorite',
-      product: { id: string; store_id?: string; name: string }
+      product: { id: string; store_id?: string; name: string; slug?: string }
     ) => {
       if (action !== 'buy') return;
+      if (!store?.slug) return;
 
       if (!product.store_id) {
         toast({
@@ -357,7 +444,6 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
         return;
       }
 
-      // Vérifier l'authentification
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -372,7 +458,6 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
         return;
       }
 
-      // Rediriger vers la page de checkout
       navigate(
         buildCheckoutUrl({
           productId: product.id,
@@ -387,19 +472,7 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
 
   // MAINTENANT les early returns APRÈS tous les hooks
   if (loading) {
-    return (
-      <div className="min-h-screen">
-        <Skeleton className="h-48 w-full" />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <Skeleton className="h-8 w-64 mb-6" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map(i => (
-              <Skeleton key={i} className="h-80" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return chromeFromLayout ? <StorefrontContentSkeleton /> : <StorefrontChromeSkeleton />;
   }
 
   if (!store && !loading) {
@@ -425,7 +498,7 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
                 setError(null);
                 fetchStore();
               }}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 touch-manipulation min-h-[44px] min-w-[44px]"
+              className="bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors duration-200 touch-manipulation min-h-[44px] min-w-[44px]"
               aria-label="Réessayer le chargement de la boutique"
             >
               Réessayer
@@ -545,7 +618,6 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
           )}
 
           <main
-            ref={headerRef}
             className={cn(
               'flex-1 bg-background overflow-x-hidden',
               previewMode ? 'pb-0' : 'pb-16 md:pb-0'
@@ -570,61 +642,34 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
                       productTypes={productTypes}
                     />
 
-                    {filteredProducts.length > 0 ? (
-                      <div ref={productsRef} className="mp-product-cards-band">
-                        {/* Indicateur de chargement discret en haut si rechargement */}
+                    {productsLoading && filteredProducts.length === 0 ? (
+                      <StorefrontProductGridSkeleton />
+                    ) : filteredProducts.length > 0 ? (
+                      <div className="mp-product-cards-band">
                         {productsLoading && hasLoadedOnce && (
                           <div className="flex justify-center mb-4">
-                            <div className="h-1 w-32 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full animate-pulse" />
+                            <div className="h-1 w-32 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full animate-pulse" />
                           </div>
                         )}
 
                         <ProductGrid
                           className={`store-product-grid ${productsLoading && hasLoadedOnce ? 'opacity-75 transition-opacity duration-300' : ''}`}
                         >
-                          {filteredProducts.map((product, index) => {
-                            // Transformer le produit vers le format unifié
-                            const productWithExtras = product as {
-                              description?: string | null;
-                              short_description?: string;
-                              promotional_price?: number;
-                              image_url?: string | null;
-                            };
-                            const unifiedProduct = transformToUnifiedProduct({
-                              ...product,
-                              description: productWithExtras.description ?? undefined,
-                              short_description: productWithExtras.short_description ?? undefined,
-                              promotional_price: productWithExtras.promotional_price ?? undefined,
-                              image_url: productWithExtras.image_url ?? undefined,
-                              stores: store
-                                ? {
-                                    id: store.id,
-                                    name: store.name,
-                                    slug: store.slug,
-                                    logo_url: store.logo_url ?? undefined,
-                                  }
-                                : undefined,
-                            } as Parameters<typeof transformToUnifiedProduct>[0]);
-
-                            return (
-                              <div
-                                key={product.id}
-                                className="animate-fade-in"
-                                style={{ animationDelay: `${index * 0.05}s` }}
-                              >
-                                <UnifiedProductCard
-                                  product={unifiedProduct}
-                                  variant="store"
-                                  productCardStyle={store?.product_card_style ?? undefined}
-                                  storePlaceholderImageUrl={store?.placeholder_image_url}
-                                  storeWatermarkUrl={store?.watermark_url}
-                                  showAffiliate={true}
-                                  showActions={true}
-                                  onAction={handleBuyProduct}
-                                />
-                              </div>
-                            );
-                          })}
+                          {unifiedCatalog.map(({ id, unified }, index) => (
+                            <div key={id} className="h-full min-w-0">
+                              <UnifiedProductCard
+                                product={unified}
+                                variant="store"
+                                productCardStyle={store?.product_card_style ?? undefined}
+                                storePlaceholderImageUrl={store?.placeholder_image_url}
+                                storeWatermarkUrl={store?.watermark_url}
+                                showAffiliate={true}
+                                showActions={true}
+                                onAction={handleBuyProduct}
+                                imagePriority={index < LCP_IMAGE_PRIORITY_COUNT}
+                              />
+                            </div>
+                          ))}
                         </ProductGrid>
                       </div>
                     ) : (
@@ -730,7 +775,7 @@ const StorefrontPage = ({ previewMode = false, storeOverride = null }: Storefron
                     !isLowBandwidth ? (
                       <DeferredReviewsList
                         reviews={reviews}
-                        loading={reviewsLoading}
+                        loading={reviewsLoading || !reviewsIdleReady}
                         storeSlug={store.slug}
                       />
                     ) : (

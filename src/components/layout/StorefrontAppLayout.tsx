@@ -9,8 +9,11 @@ import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
 import StoreHeader from '@/components/storefront/StoreHeader';
 import StoreFooter from '@/components/storefront/StoreFooter';
 import { RouteOutletSuspense } from '@/components/navigation/RouteChunkFallback';
+import { StorefrontContentSkeleton } from '@/components/storefront/StorefrontChromeSkeleton';
+import '@/styles/storefront-lite.css';
 import { useScrollRestoration } from '@/hooks/useScrollRestoration';
 import { useCurrentStoreBySubdomain } from '@/hooks/useStoreBySubdomain';
+import { useStoreTrustMetrics } from '@/hooks/useStoreTrustMetrics';
 import { StorefrontShellProvider } from '@/contexts/StorefrontShellContext';
 import { shouldShowStoreChrome, shouldShowStoreHeader } from '@/lib/storefront/storefront-chrome';
 import type { Store as ThemedStore } from '@/hooks/useStores';
@@ -21,6 +24,7 @@ export function StorefrontAppLayout() {
   const location = useLocation();
   // Résout via le host réel (subdomain / custom domain), pas le slug — aligné middleware RQ cache
   const { data: store, isLoading: storeLoading } = useCurrentStoreBySubdomain();
+  const storeTrust = useStoreTrustMetrics((store as ThemedStore) ?? null);
   const showChrome = shouldShowStoreChrome(location.pathname);
   const showHeader = shouldShowStoreHeader(location.pathname);
 
@@ -38,6 +42,8 @@ export function StorefrontAppLayout() {
     ? ({
         ...store,
         description: store.description ?? null,
+        active_clients: storeTrust.activeClients,
+        is_verified: storeTrust.isVerified,
       } as HeaderStore & {
         logo_url?: string;
         banner_url?: string;
@@ -59,7 +65,7 @@ export function StorefrontAppLayout() {
           {showHeader && headerStore && <StoreHeader store={headerStore} />}
 
           <div className="flex-1 flex flex-col min-w-0">
-            <RouteOutletSuspense>
+            <RouteOutletSuspense fallback={<StorefrontContentSkeleton />}>
               <Outlet />
             </RouteOutletSuspense>
           </div>

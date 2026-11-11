@@ -1,6 +1,4 @@
 import { lazy, Suspense, type ComponentProps } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent } from '@/components/ui/card';
 
 const StoreMarketingSections = lazy(() =>
   import('@/components/storefront/StoreMarketingSections').then(m => ({
@@ -21,10 +19,10 @@ const StoreLocationSection = lazy(() =>
 
 function SectionFallback({ label }: { label: string }) {
   return (
-    <div className="space-y-3 py-4" aria-busy="true" aria-label={label}>
-      <Skeleton className="h-6 w-40" />
-      <Skeleton className="h-24 w-full" />
-      <Skeleton className="h-24 w-full" />
+    <div className="space-y-4 py-6" aria-busy="true" aria-label={label}>
+      <div className="h-6 w-40 rounded-md bg-muted/70 animate-pulse" />
+      <div className="h-28 w-full rounded-xl bg-muted/50 animate-pulse" />
+      <div className="h-28 w-full rounded-xl bg-muted/40 animate-pulse" />
     </div>
   );
 }
@@ -49,11 +47,9 @@ export function DeferredContactForm(props: ComponentProps<typeof ContactForm>) {
   return (
     <Suspense
       fallback={
-        <Card>
-          <CardContent className="pt-6">
-            <SectionFallback label="Chargement du formulaire de contact" />
-          </CardContent>
-        </Card>
+        <div className="rounded-xl border border-border/60 bg-card/80 p-6">
+          <SectionFallback label="Chargement du formulaire de contact" />
+        </div>
       }
     >
       <ContactForm {...props} />

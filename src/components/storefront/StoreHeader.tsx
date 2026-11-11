@@ -65,6 +65,9 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
                 role="presentation"
                 className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover blur-2xl opacity-50"
                 aria-hidden
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
               />
               <div
                 className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-background/40"
@@ -76,6 +79,7 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
                 className="relative z-10 mx-auto h-full w-full object-contain object-center"
                 loading="eager"
                 decoding="async"
+                fetchPriority="high"
                 sizes="100vw"
               />
             </>
@@ -84,7 +88,7 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
               className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10"
               aria-hidden
             >
-              <Users className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 text-primary/25 animate-pulse" />
+              <Users className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 text-primary/25" />
             </div>
           )}
 
@@ -111,6 +115,7 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
                     className="h-full w-full object-cover"
                     loading="eager"
                     decoding="async"
+                    fetchPriority={displayBannerUrl ? 'low' : 'high'}
                   />
                 </div>
                 {store.is_verified && (
