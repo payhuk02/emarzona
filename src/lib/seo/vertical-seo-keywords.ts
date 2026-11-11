@@ -61,20 +61,13 @@ export const VERTICAL_SEO_KEYWORDS: Record<PlatformVerticalId, VerticalSeoKeywor
   },
 };
 
-/** Mots-clés globaux landing / home (les 5 verticales + plateforme). */
-export const PLATFORM_SEO_KEYWORDS = [
-  'ecommerce',
-  'marketplace',
-  'plateforme e-commerce',
-  ...PLATFORM_VERTICAL_IDS.flatMap(id => VERTICAL_SEO_KEYWORDS[id].coreTerms),
-  'Afrique',
-  "Afrique de l'Ouest",
-  'Mobile Money',
-  'GeniusPay',
-  'paiements sécurisés',
-  'marketing intégré',
-  'Emarzona',
-].join(', ');
+/**
+ * Mots-clés landing (chaîne autonome).
+ * Ne pas dériver de VERTICAL_SEO_KEYWORDS : ce module est dans le bundle
+ * principal via AutoSEO / Landing, les packs longs restent sur les pages lazy.
+ */
+export const PLATFORM_SEO_KEYWORDS =
+  "ecommerce, marketplace, plateforme e-commerce, produits digitaux, produits physiques, services, cours en ligne, œuvres d'artiste, Afrique, Mobile Money, paiements sécurisés, Emarzona";
 
 export function getVerticalSeoKeywords(vertical: string | null | undefined): string {
   if (!vertical) return PLATFORM_SEO_KEYWORDS;

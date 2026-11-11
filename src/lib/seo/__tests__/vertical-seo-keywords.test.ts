@@ -18,13 +18,14 @@ describe('vertical-seo-keywords', () => {
     }
   });
 
-  it('embeds every vertical core term in platform keywords', () => {
+  it('embeds each vertical in platform keywords without pulling long packs', () => {
     const lower = PLATFORM_SEO_KEYWORDS.toLowerCase();
-    for (const id of PLATFORM_VERTICAL_IDS) {
-      for (const term of VERTICAL_SEO_KEYWORDS[id].coreTerms) {
-        expect(lower).toContain(term.toLowerCase());
-      }
-    }
+    expect(lower).toContain('produits digitaux');
+    expect(lower).toContain('produits physiques');
+    expect(lower).toContain('services');
+    expect(lower).toContain('cours en ligne');
+    expect(lower).toContain("œuvres d'artiste");
+    expect(PLATFORM_SEO_KEYWORDS.length).toBeLessThan(280);
   });
 
   it('merges product extras without duplicating vertical terms', () => {
