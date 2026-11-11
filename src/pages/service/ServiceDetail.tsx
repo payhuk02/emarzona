@@ -786,7 +786,12 @@ export default function ServiceDetail() {
             service.description ||
             `${service.name} - Disponible sur Emarzona`
           }
-          keywords={service.category}
+          keywords={
+            (service as { meta_keywords?: string }).meta_keywords ||
+            ['services', 'prestation', 'réservation', service.category, service.name, 'Emarzona']
+              .filter(Boolean)
+              .join(', ')
+          }
           url={serviceUrl}
           image={images[0]}
           imageAlt={service.name}

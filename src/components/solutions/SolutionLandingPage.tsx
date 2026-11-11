@@ -25,7 +25,12 @@ export default function SolutionLandingPage({ config, defaultHeroSrc }: Props) {
 
   return (
     <MarketingPageShell>
-      <SEOMeta title={config.seoTitle} description={config.seoDescription} />
+      <SEOMeta
+        title={config.seoTitle}
+        description={config.seoDescription}
+        keywords={config.seoKeywords}
+        url={`https://www.emarzona.com${config.route}`}
+      />
 
       {/* ─── HERO ─── */}
       <section

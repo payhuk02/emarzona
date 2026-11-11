@@ -81,6 +81,17 @@ export default function ServicesCategoryListing() {
       <SEOMeta
         title={`${title} | Services Emarzona`}
         description={description}
+        keywords={[
+          'services',
+          'prestation',
+          'réservation',
+          title,
+          parent?.name,
+          child?.name,
+          'Emarzona',
+        ]
+          .filter(Boolean)
+          .join(', ')}
         url={
           child
             ? `/services/${parent?.slug}/${child.slug}`

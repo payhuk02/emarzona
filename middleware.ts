@@ -66,7 +66,7 @@ interface Meta {
 }
 
 const DEFAULT_META: Meta = {
-  title: 'Emarzona — Vendez tout. Gérez tout. Sans limites.',
+  title: 'Emarzona — Plateforme e-commerce tout-en-un pour vendre tout et partout',
   description:
     "Plateforme e-commerce premium : produits digitaux, physiques, services, cours et œuvres d'artiste. Paiements sécurisés, marketing intégré, marketplace Afrique.",
   image: `${SITE}/og-image.png`,

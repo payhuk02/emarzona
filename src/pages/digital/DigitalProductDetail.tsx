@@ -296,6 +296,19 @@ export default function DigitalProductDetail() {
             product.meta_description ||
             (product.short_description || product.description || '').slice(0, 160)
           }
+          keywords={
+            product.meta_keywords ||
+            [
+              'produits digitaux',
+              'ebook',
+              'téléchargement',
+              product.category,
+              product.name,
+              'Emarzona',
+            ]
+              .filter(Boolean)
+              .join(', ')
+          }
           url={`https://www.emarzona.com/digital/${productId}`}
           image={product.og_image || product.image_url}
           type="product"

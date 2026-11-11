@@ -32,6 +32,13 @@ const DEFAULT_METADATA: SEOMetadata = {
     'vente en ligne',
     'plateforme e-commerce',
     'multi-boutiques',
+    'produits digitaux',
+    'produits physiques',
+    'services',
+    'cours en ligne',
+    "œuvres d'artiste",
+    'marketplace',
+    'Emarzona',
   ],
   ogType: 'website',
   robots: 'index, follow',
@@ -146,7 +153,7 @@ function updateLinkTag(rel: string, href: string): void {
  */
 export function generateSchemaOrg(data: {
   type: 'Product' | 'Organization' | 'WebSite' | 'BreadcrumbList';
-  [key: string]: any;
+  [key: string]: unknown;
 }): void {
   const schema = {
     '@context': 'https://schema.org',

@@ -86,7 +86,7 @@ export default function CoursesCatalog() {
           description="Découvrez des formations et cours en ligne sur Emarzona : développement, business, design, marketing et plus encore."
           url="https://www.emarzona.com/courses"
           type="website"
-          keywords="cours en ligne, formation, e-learning, apprentissage, Emarzona"
+          keywords="cours en ligne, formation, e-learning, LMS, certificat, apprendre en ligne, école en ligne, Emarzona"
         />
 
         {schemaItems.length > 0 && (

@@ -326,7 +326,19 @@ export default function PhysicalProductDetail() {
             product.description ||
             `${product.name} - Disponible sur Emarzona`
           }
-          keywords={product.category}
+          keywords={
+            product.meta_keywords ||
+            [
+              'produits physiques',
+              'livraison',
+              'ecommerce',
+              product.category,
+              product.name,
+              'Emarzona',
+            ]
+              .filter(Boolean)
+              .join(', ')
+          }
           url={productUrl}
           image={product.og_image || images[0]}
           imageAlt={product.name}

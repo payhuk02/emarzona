@@ -21,7 +21,7 @@ describe('landing-seo', () => {
   it('allows locale overrides without mutating defaults', () => {
     const seo = getLandingSEO({ title: 'Emarzona — Sell everything' });
     expect(seo.title).toBe('Emarzona — Sell everything');
-    expect(LANDING_SEO_DEFAULTS.title).toContain('Vendez tout');
+    expect(LANDING_SEO_DEFAULTS.title).toContain('Plateforme e-commerce tout-en-un');
   });
 
   it('builds hreflang alternates for all premium locales', () => {

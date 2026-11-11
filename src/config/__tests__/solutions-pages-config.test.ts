@@ -18,6 +18,7 @@ describe('SOLUTIONS_PAGES copy encoding', () => {
         page.heroSubtitle,
         page.seoTitle,
         page.seoDescription,
+        page.seoKeywords,
         ...page.statsItems.map(item => item.label),
         ...page.categories.map(item => item.label),
         ...page.features.flatMap(item => [item.title, item.description]),

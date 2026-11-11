@@ -2,14 +2,15 @@
  * Source unique pour le SEO de la landing (aligne index.html, PageSEOConfig, Landing.tsx).
  */
 import { AVAILABLE_LANGUAGES, type LanguageCode, normalizeLanguageCode } from '@/i18n/languages';
+import { PLATFORM_SEO_KEYWORDS } from '@/lib/seo/vertical-seo-keywords';
 
 export const LANDING_CANONICAL_URL = 'https://www.emarzona.com/';
 
-export const LANDING_SEO_KEYWORDS =
-  'ecommerce, marketplace, produits digitaux, produits physiques, services, cours en ligne, œuvres artiste, Afrique, paiements sécurisés, marketing intégré';
+/** Alias → `PLATFORM_SEO_KEYWORDS` (5 verticales + plateforme). */
+export const LANDING_SEO_KEYWORDS = PLATFORM_SEO_KEYWORDS;
 
 export const LANDING_SEO_DEFAULTS = {
-  title: 'Emarzona — Vendez tout. Gérez tout. Sans limites.',
+  title: 'Emarzona — Plateforme e-commerce tout-en-un pour vendre tout et partout',
   description:
     "Plateforme e-commerce premium : produits digitaux, physiques, services, cours et œuvres d'artiste. Paiements sécurisés, marketing intégré, marketplace Afrique.",
   keywords: LANDING_SEO_KEYWORDS,

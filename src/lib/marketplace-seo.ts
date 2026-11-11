@@ -1,36 +1,37 @@
 import { FilterState } from '@/types/marketplace';
 import { filtersToSearchParams } from '@/lib/marketplace-url-filters';
+import { PLATFORM_SEO_KEYWORDS, VERTICAL_SEO_KEYWORDS } from '@/lib/seo/vertical-seo-keywords';
 
 const PRODUCT_TYPE_SEO: Record<string, { title: string; description: string; keywords: string }> = {
   digital: {
-    title: 'Produits digitaux',
+    title: VERTICAL_SEO_KEYWORDS.digital.label,
     description:
       'eBooks, templates, logiciels et ressources numériques sur Emarzona. Téléchargement instantané, paiement sécurisé.',
-    keywords: 'produits digitaux, ebook, template, logiciel, téléchargement',
+    keywords: VERTICAL_SEO_KEYWORDS.digital.keywords,
   },
   physical: {
-    title: 'Produits physiques',
+    title: VERTICAL_SEO_KEYWORDS.physical.label,
     description:
       'Articles physiques avec livraison sur Emarzona. Boutiques vérifiées, stock en temps réel.',
-    keywords: 'produits physiques, livraison, ecommerce, stock',
+    keywords: VERTICAL_SEO_KEYWORDS.physical.keywords,
   },
   service: {
-    title: 'Services',
+    title: VERTICAL_SEO_KEYWORDS.service.label,
     description:
       'Prestations et consultations à réserver en ligne sur Emarzona. Freelances et experts.',
-    keywords: 'services, prestation, réservation, consultation',
+    keywords: VERTICAL_SEO_KEYWORDS.service.keywords,
   },
   course: {
-    title: 'Cours en ligne',
+    title: VERTICAL_SEO_KEYWORDS.course.label,
     description:
       'Formations et cours en ligne sur Emarzona. Apprenez à votre rythme avec des créateurs certifiés.',
-    keywords: 'cours en ligne, formation, e-learning, LMS',
+    keywords: VERTICAL_SEO_KEYWORDS.course.keywords,
   },
   artist: {
-    title: "Œuvres d'artistes",
+    title: VERTICAL_SEO_KEYWORDS.artist.label,
     description:
       "Art digital, illustrations et œuvres uniques sur Emarzona. Éditions limitées et certificats d'authenticité.",
-    keywords: 'art, artiste, œuvre, illustration, NFT',
+    keywords: VERTICAL_SEO_KEYWORDS.artist.keywords,
   },
 };
 
@@ -138,8 +139,7 @@ export function buildMarketplaceSEO(
   return {
     title: `Marketplace Emarzona${countLabel}`,
     description: `Découvrez ${totalProducts} produits sur Emarzona : digitaux, physiques, services, cours en ligne et œuvres d'art. Paiement sécurisé Mobile Money & GeniusPay.`,
-    keywords:
-      "marketplace afrique, produits digitaux, produits physiques, services, cours en ligne, œuvres d'art, ecommerce afrique, XOF, FCFA",
+    keywords: `${PLATFORM_SEO_KEYWORDS}, marketplace afrique, ecommerce afrique, XOF, FCFA`,
     url: canonical,
     h1: 'Marketplace',
   };

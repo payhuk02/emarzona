@@ -90,7 +90,8 @@
       }
     ],
     "seoTitle": "Vendre des produits physiques en ligne | Emarzona",
-    "seoDescription": "Boutique e-commerce complète pour vendre vos produits physiques : gestion de stock, livraison FedEx, COD, garantie et mobile money. Lancez-vous en 5 minutes."
+    "seoDescription": "Boutique e-commerce complète pour vendre vos produits physiques : gestion de stock, livraison FedEx, COD, garantie et mobile money. Lancez-vous en 5 minutes.",
+    "seoKeywords": "produits physiques, boutique en ligne, livraison, stock, ecommerce, paiement à la livraison, FedEx, Emarzona"
   },
   "digital": {
     "heroTag": "Produits digitaux",
@@ -171,7 +172,8 @@
       }
     ],
     "seoTitle": "Vendre des produits digitaux | Emarzona",
-    "seoDescription": "Plateforme de vente de produits digitaux : ebooks, templates, logiciels, musique. Livraison instantanée, licences sécurisées, affiliation automatisée."
+    "seoDescription": "Plateforme de vente de produits digitaux : ebooks, templates, logiciels, musique. Livraison instantanée, licences sécurisées, affiliation automatisée.",
+    "seoKeywords": "produits digitaux, ebook, template, logiciel, téléchargement instantané, licence numérique, vente digitale, Emarzona"
   },
   "services": {
     "heroTag": "Services & prestations",
@@ -253,7 +255,8 @@
       }
     ],
     "seoTitle": "Vendre des services en ligne | Emarzona",
-    "seoDescription": "Plateforme de vente de services : réservation en ligne, calendrier intégré, acomptes, rappels automatiques. Parfait pour consultants, coachs, freelances."
+    "seoDescription": "Plateforme de vente de services : réservation en ligne, calendrier intégré, acomptes, rappels automatiques. Parfait pour consultants, coachs, freelances.",
+    "seoKeywords": "services en ligne, prestation, réservation, consultation, freelance, coaching, calendrier, Emarzona"
   },
   "courses": {
     "heroTag": "Cours en ligne",
@@ -336,7 +339,8 @@
       }
     ],
     "seoTitle": "Créer et vendre des cours en ligne | Emarzona",
-    "seoDescription": "Plateforme de formation en ligne : vidéos, drip content, quiz, certificats, communauté. Lancez votre êcole en ligne comme Udemy, avec votre marque."
+    "seoDescription": "Plateforme de formation en ligne : vidéos, drip content, quiz, certificats, communauté. Lancez votre êcole en ligne comme Udemy, avec votre marque.",
+    "seoKeywords": "cours en ligne, formation, e-learning, LMS, certificat, apprendre en ligne, école en ligne, Emarzona"
   },
   "artist": {
     "heroTag": "Oeuvres & créations",
@@ -414,7 +418,8 @@
       }
     ],
     "seoTitle": "Vendre des oeuvres d'artiste en ligne | Emarzona",
-    "seoDescription": "Galerie e-commerce pour artistes : peinture, sculpture, illustration, photographie. Certificats d'authenticité, éditions limitées, enchères publiques."
+    "seoDescription": "Galerie e-commerce pour artistes : peinture, sculpture, illustration, photographie. Certificats d'authenticité, éditions limitées, enchères publiques.",
+    "seoKeywords": "œuvres d'artiste, art, artiste, illustration, galerie en ligne, certificat d'authenticité, édition limitée, Emarzona"
   },
   "protect": {
     "heroTag": "Protection acheteur",
@@ -486,6 +491,7 @@
       }
     ],
     "seoTitle": "Emarzona Protect — Protection acheteur | Emarzona",
-    "seoDescription": "Protection acheteur Emarzona : 45 jours pour réclamer, couverture sur les 5 types de produits, remboursement assisté sans frais. Achetez en confiance."
+    "seoDescription": "Protection acheteur Emarzona : 45 jours pour réclamer, couverture sur les 5 types de produits, remboursement assisté sans frais. Achetez en confiance.",
+    "seoKeywords": "protection acheteur, garantie, remboursement, produits digitaux, produits physiques, services, cours en ligne, œuvres d'artiste, Emarzona Protect"
   }
 }

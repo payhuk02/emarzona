@@ -81,6 +81,7 @@ export type SolutionPageConfig = {
   steps: SolutionStep[];
   seoTitle: string;
   seoDescription: string;
+  seoKeywords: string;
 };
 
 type PageCopy = (typeof copy)[keyof typeof copy];
@@ -119,6 +120,7 @@ function withCopy(
     steps: pageCopy.steps.map(step => ({ ...step })),
     seoTitle: pageCopy.seoTitle,
     seoDescription: pageCopy.seoDescription,
+    seoKeywords: pageCopy.seoKeywords,
   };
 }
 

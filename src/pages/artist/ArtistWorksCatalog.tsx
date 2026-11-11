@@ -86,7 +86,7 @@ export default function ArtistWorksCatalog() {
           description="Découvrez des œuvres originales d'artistes sur Emarzona : peintures, illustrations, photographies, éditions limitées et certificats d'authenticité."
           url="https://www.emarzona.com/art"
           type="website"
-          keywords="art, artistes, œuvres originales, marketplace art, achat art en ligne, Emarzona"
+          keywords="œuvres d'artiste, art, artiste, illustration, galerie en ligne, certificat d'authenticité, édition limitée, Emarzona"
         />
 
         {schemaItems.length > 0 && (

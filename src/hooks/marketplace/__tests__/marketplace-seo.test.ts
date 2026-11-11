@@ -27,6 +27,19 @@ describe('marketplace-seo', () => {
     expect(seo.title).toContain('Produits digitaux');
     expect(seo.title).toContain('42');
     expect(seo.url).toBe('https://www.emarzona.com/marketplace?type=digital');
+    expect(seo.keywords.toLowerCase()).toContain('produits digitaux');
+  });
+
+  it('exposes keywords for each of the five verticals', () => {
+    const types = ['digital', 'physical', 'service', 'course', 'artist'] as const;
+    for (const productType of types) {
+      const seo = buildMarketplaceSEO(
+        { ...baseFilters, productType },
+        { totalProducts: 1, searchQuery: '', origin: 'https://www.emarzona.com' }
+      );
+      expect(seo.keywords.split(',').length).toBeGreaterThanOrEqual(4);
+      expect(seo.keywords.toLowerCase()).toContain('emarzona');
+    }
   });
 
   it('builds search breadcrumb trail', () => {

@@ -361,7 +361,12 @@ const ArtistProductDetail = () => {
           product.description ||
           `${product.name || 'Œuvre'} - Œuvre d'artiste disponible sur Emarzona`
         }
-        keywords={product.category || undefined}
+        keywords={
+          product.meta_keywords ||
+          ["œuvres d'artiste", 'art', 'galerie', product.category, product.name, 'Emarzona']
+            .filter(Boolean)
+            .join(', ')
+        }
         url={productUrl}
         image={images[0] || undefined}
         imageAlt={product.name || "Œuvre d'artiste"}

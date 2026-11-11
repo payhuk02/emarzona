@@ -4,6 +4,7 @@
  */
 
 import { LANDING_SEO_DEFAULTS } from '@/lib/landing-seo';
+import { VERTICAL_SEO_KEYWORDS } from '@/lib/seo/vertical-seo-keywords';
 
 export interface PageSEOEntry {
   title: string;
@@ -60,13 +61,42 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
     title: 'Cours en ligne | Emarzona',
     description:
       'Formations et cours en ligne : développement, business, design, marketing. Apprenez à votre rythme avec certificats.',
-    keywords: 'cours en ligne, formation, e-learning, certificat',
+    keywords: VERTICAL_SEO_KEYWORDS.course.keywords,
   },
   '/art': {
     title: "Œuvres d'artistes | Emarzona",
     description:
       "Achetez des œuvres originales d'artistes : éditions limitées, certificats d'authenticité, collections et enchères.",
-    keywords: 'art, artistes, œuvres, marketplace art, enchères',
+    keywords: VERTICAL_SEO_KEYWORDS.artist.keywords,
+  },
+  '/solutions/physical': {
+    title: 'Vendre des produits physiques en ligne | Emarzona',
+    description:
+      'Boutique e-commerce complète pour vendre vos produits physiques : stock, livraison, COD et mobile money.',
+    keywords: VERTICAL_SEO_KEYWORDS.physical.keywords,
+  },
+  '/solutions/digital': {
+    title: 'Vendre des produits digitaux | Emarzona',
+    description:
+      'Vendez ebooks, templates et logiciels avec livraison instantanée et licences sécurisées.',
+    keywords: VERTICAL_SEO_KEYWORDS.digital.keywords,
+  },
+  '/solutions/services': {
+    title: 'Vendre des services en ligne | Emarzona',
+    description:
+      'Réservation, calendrier et acomptes pour consultants, coachs et freelances sur Emarzona.',
+    keywords: VERTICAL_SEO_KEYWORDS.service.keywords,
+  },
+  '/solutions/courses': {
+    title: 'Créer et vendre des cours en ligne | Emarzona',
+    description:
+      'LMS Emarzona : vidéos, quiz, certificats et communauté pour monétiser votre savoir.',
+    keywords: VERTICAL_SEO_KEYWORDS.course.keywords,
+  },
+  '/solutions/artist': {
+    title: "Vendre des œuvres d'artiste en ligne | Emarzona",
+    description: "Galerie e-commerce : certificats d'authenticité, éditions limitées et enchères.",
+    keywords: VERTICAL_SEO_KEYWORDS.artist.keywords,
   },
   '/auctions': {
     title: 'Enchères en ligne | Emarzona',
@@ -84,13 +114,19 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
     title: 'Recherche de produits digitaux | Emarzona',
     description:
       'Recherchez parmi des milliers de produits digitaux : ebooks, templates, logiciels, formations et plus.',
-    keywords: 'recherche, produits digitaux, ebooks, templates',
+    keywords: VERTICAL_SEO_KEYWORDS.digital.keywords,
   },
   '/digital/compare': {
     title: 'Comparer des produits digitaux | Emarzona',
     description:
       'Comparez les caractéristiques et prix de produits digitaux côte à côte pour faire le meilleur choix.',
-    keywords: 'comparer, produits digitaux, comparaison',
+    keywords: VERTICAL_SEO_KEYWORDS.digital.keywords,
+  },
+  '/services': {
+    title: 'Services en ligne | Emarzona',
+    description:
+      'Trouvez et réservez des prestations : consultation, coaching, design, freelances vérifiés sur Emarzona.',
+    keywords: VERTICAL_SEO_KEYWORDS.service.keywords,
   },
   '/products/compare': {
     title: 'Comparer des produits | Emarzona',

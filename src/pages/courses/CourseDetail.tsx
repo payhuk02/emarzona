@@ -327,7 +327,19 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
           type="product"
           price={product.promotional_price || product.price}
           currency={product.currency}
-          keywords={`cours, formation, ${product.category || ''}, en ligne`}
+          keywords={
+            product.meta_keywords ||
+            [
+              'cours en ligne',
+              'formation',
+              'e-learning',
+              product.category,
+              product.name,
+              'Emarzona',
+            ]
+              .filter(Boolean)
+              .join(', ')
+          }
         />
 
         {/* Initialiser les pixels externes (GA, FB, GTM, TikTok) */}
